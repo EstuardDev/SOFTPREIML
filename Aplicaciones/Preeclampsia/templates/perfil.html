@@ -1,0 +1,134 @@
+{% extends "./sidebar.html" %}
+{% block title %} Perfil {% endblock %}
+{%block body%}
+{% load static %}
+<div class="content">
+
+    <div class="row">
+        <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6 col-xl-6">
+            <h2>Administrar Usuario</h2>
+            <hr><br>
+            <form id="form-perfil" action="{% url 'perfil' %}" method="post">
+                {% csrf_token %}
+                <div class="form-floating mb-3">
+                    <input type="text" class="form-control" id="username" name="username"
+                        value="{{ request.user.username  }}" placeholder="Ingresar DNI" autocomplete="name" readonly />
+                    <label for="username">Nombre de Usuario</label>
+                </div>
+                <div class="form-floating mb-3">
+                    <input type="password" class="form-control" id="password" name="password"
+                        placeholder="Ingresar contraseña actual" />
+                    <label for="password">Contraseña Actual</label>
+                </div>
+                <div class="form-floating mb-3">
+                    <input type="password" class="form-control" id="new_password" name="new_password"
+                        placeholder="Ingresar contraseña actual" />
+                    <label for="new_password">Nueva contraseña</label>
+                </div>
+                <div class="form-floating mb-3">
+                    <input type="password" class="form-control" id="confirm_password" name="confirm_password"
+                        placeholder="Ingresar contraseña actual" />
+                    <label for="confirm_password">Confirmar contraseña</label>
+                </div>
+                <div class="botones mb-2 text-center">
+                    <button type="submit" class="btn btn-primary">Actualizar perfil</button>
+                    <button type="submit" id="btnCancelar" class="btn btn-danger">Cancelar</button>
+                </div>
+            </form>
+        </div>
+        <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6 col-xl-6">
+            <h2>Datos Personales</h2>
+            <hr><br>
+            {% if request.user.is_superuser %}
+            <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 col-xl-12">
+                <div class="card shadow">
+                    <div class="card-body">
+                        <div class="d-flex">
+                            <div class="flex-grow-1">
+                                <h4 class="text-muted">Super Usuario</h4>
+                                <h4 class="mb-0">{{ request.user.username }}</h4>
+                            </div>
+                            <div class="flex-shrink-0 align-self-center">
+                                <div class="mini-stat-icon avatar-sm rounded-circle bg-light">
+                                    <span class="avatar-title">
+                                        <i class="fa-solid fa-user-secret"></i>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 col-xl-12">
+                <form>
+                    <div class="form-floating mb-3">
+                        <input type="text" class="form-control" id="Nombres" name="Nombres"
+                            value="{{ personal.nombre }}" placeholder="Nombres" readonly />
+                        <label for="Nombres">Nombres</label>
+                    </div>
+                    <div class="form-floating mb-3">
+                        <input type="text" class="form-control" id="Apellidos" name="Apellidos"
+                            value="{{ personal.apellidos }}" placeholder="Apellidos" readonly />
+                        <label for="Apellidos">Apellidos</label>
+                    </div>
+                    <div class="form-floating mb-3">
+                        <input type="text" class="form-control" id="DNI" name="DNI" value="{{ personal.dni }}"
+                            placeholder="DNI" readonly />
+                        <label for="DNI">DNI</label>
+                    </div>
+                    <div class="form-floating mb-3">
+                        <div class="row-fila">
+                            <div class="col-xs-12 col-sm-12 col-md-12 col-lg-6 col-xl-6">
+                                <div class="form-floating mb-3">
+                                    <input type="text" class="form-control" id="rol" name="rol" value="{{ rol }}"
+                                        placeholder="Rol" readonly />
+                                    <label for="rol">Rol</label>
+                                </div>
+                            </div>
+                            <div class="col-xs-12 col-sm-12 col-md-12 col-lg-6 col-xl-6">
+                                <div class="form-floating px-2">
+                                    <h5>
+                                        Estado:
+                                        {% if personal.estado == '1' %}
+                                        <span class="badge bg-success">Activo</span>
+                                        {% else %}
+                                        <span class="badge bg-danger">Inactivo</span>
+                                        {% endif %}
+                                    </h5>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            {% endif %}
+        </div>
+        <!-- <div class="col-6">
+            <h2>Administrar rol del Personal</h2>
+            <hr><br>
+            <form id="form-usuarios-grupos" action="{% url 'perfil' %}" method="post">
+                {% csrf_token %}
+                <div class="form-floating mb-3">
+                    <select class="form-control" id="usuario" name="usuario">
+                        {% for user in users %}
+                            <option value="{{ user.id }}">{{ user.username }}</option>
+                        {% endfor %}
+                    </select>
+                    <label for="usuario">Seleccionar usuario</label>
+                </div>
+                <div class="form-floating mb-3">
+                    <select class="form-control" id="grupo" name="grupo">
+                        {% for group in groups %}
+                            <option value="{{ group.id }}">{{ group.name }}</option>
+                        {% endfor %}
+                    </select>
+                    <label for="grupo">Seleccionar grupo</label>
+                </div>
+                <button type="submit" class="btn btn-primary">Actualizar grupo</button>
+            </form>
+        </div> -->
+    </div>
+</div>
+<script src="{% static 'assets/js/scripts/perfil.js' %}"></script>
+{%endblock%}

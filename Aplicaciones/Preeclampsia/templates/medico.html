@@ -1,0 +1,188 @@
+{% extends "./sidebar.html" %}
+{% block title %} Personal Médico {% endblock %}
+{%block body%}
+{% load static %}
+<div class="content">
+    
+    <section class="content-header">
+        <div class="filters">
+            <div class="row">
+                <div class="col-sm-12 col-md-12 col-lg-12 col-xl-12">
+                    <h1>Listado de Personal</h1>
+                    <hr />
+                    <div class="row align-items-center">
+                        <div class="col-sm-12 col-md-3 col-lg-3 col-xl-3">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control" id="filtro-dni" placeholder="Filtrar por DNI"
+                                    minlength="8" maxlength="8"/>
+                                <label for="filtro-dni">Filtrar DNI/Nombre</label>
+                            </div>
+                        </div>
+                        <div class="col-sm-12 col-md-3 col-lg-3 col-xl-3">
+                            <div class="form-floating mb-3">
+                                <select class="form-select" id="filtro-estado" aria-label="Estado">
+                                    <option value="">Seleccione un estado</option>
+                                    <option value="Activo">Activo</option>
+                                    <option value="Inactivo">Inactivo</option>
+                                </select>
+                                <label for="filtro-estado">Estado</label>
+                            </div>
+                        </div>
+                        <div class="col-sm-12 col-md-3 col-lg-3 col-xl-3">
+                            <div class="form-floating mb-3">
+                                <input type="date" class="form-control" id="filtro-fecha"
+                                    placeholder="Filtrar por fecha" autocomplete="name" />
+                                <label for="filtro-fecha">Filtrar por fecha</label>
+                            </div>
+                        </div>
+                        <div class="col-sm-12 col-md-3 col-lg-3 col-xl-2">
+                            <button type="button" class="btn btn-primary" data-bs-toggle="modal"
+                                data-bs-target="#exampleModalM">
+                                Agregar Médico
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Modal -->
+    <div class="modal fade" id="exampleModalM" tabindex="-1" aria-labelledby="exampleModalMLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalMLabel">Agregar Médico</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="form-Personal" action="{% url 'guardar' %}" method="post">
+                        {% csrf_token %}
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" id="txtdni" name="txtdni" placeholder="Ingresar DNI"
+                                minlength="8" maxlength="8" required />
+                            <label for="txtdni">Ingresar DNI</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" id="txtnombre" name="txtnombre"
+                                placeholder="ingresar Nombres" />
+                            <label for="txtnombre">Ingresar Nombre</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" id="txtapellido" name="txtapellido"
+                                placeholder="Ingresar Apellidos" />
+                            <label for="txtapellido">Ingresar Apellidos</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <button type="submit" class="btn btn-primary text-while">
+                                Guardar
+                            </button>
+                            <button type="submit" class="btn btn-danger text-while btnLimpiar">
+                                Limpiar
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para editar médico -->
+    <div class="modal fade" id="editModalM" tabindex="-1" aria-labelledby="editModalMLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editModalMLabel">Editar Médico</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="form-Epersonal" action="{% url 'editarMedico' %}" method="post">
+                        {% csrf_token %}
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" id="txteditdni" name="txteditdni"
+                                value="{{personal.dni}}" placeholder="Ingresar DNI" readonly />
+                            <label for="txteditdni">Ingresar DNI</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" id="txteditnombre" name="txteditnombre"
+                                value="{{personal.nombre}}" placeholder="Ingresar Nombre" />
+                            <label for="txteditnombre">Ingresar Nombre</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" id="txteditapellido" name="txteditapellido"
+                                value="{{personal.apellidos}}" placeholder="Ingresar Apellidos" />
+                            <label for="txteditapellido">Ingresar Apellidos</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <button type="submit" class="btn btn-primary text-while">
+                                Guardar
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <section>
+        <!-- Tabla responsive -->
+        <div class="table-responsive">
+            <table id="tablaMedico" class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>DNI</th>
+                        <th>NOMBRE</th>
+                        <th>APELLIDOS</th>
+                        <th>F. REGISTRO</th>
+                        <th>ESTADO</th>
+                        <th colspan="2">ACCIONES</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Aquí se mostrarán los datos de los médicos -->
+                    {% for m in medico %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ m.dni }}</td>
+                        <td>{{ m.nombre }}</td>
+                        <td>{{ m.apellidos }}</td>
+                        <td>{{ m.fecharegistro|date:"d-m-Y" }}</td>
+                        <td>
+                            {% if m.estado == '1' %}
+                            <span class="badge bg-success">Activo</span>
+                            {% else %}
+                            <span class="badge bg-danger">Inactivo</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if m.estado == '1' %}
+                            <a href="{% url 'edicionMedico' m.dni %}" data-dni="{{ m.dni}}"
+                                class="btn btn-outline-primary btnEditar" data-bs-toggle="modal" data-bs-target="#editModal">
+                                <i class="fa-solid fa-pen-to-square"></i>
+                            </a>
+                            {% else %}
+                            <a href="{% url 'activarMedico' m.dni %}" class="btn btn-outline-success btnActivar">
+                                <i class="fa-solid fa-circle-check"></i>
+                            </a>
+                            {% endif %}
+                            <a href="{% url 'eliminarMedico' m.dni %}" class="btn btn-outline-danger btnEliminar">
+                                <i class="fa-solid fa-prescription-bottle-medical"></i>
+                            </a>
+                        </td>
+                    </tr>                   
+                    {% endfor %}
+                </tbody>
+            </table>
+            <div id="pagination-controls">
+                <button id="anterior" class="btn btn-primary"><i class="fa-solid fa-chevron-left"></i></button>
+                <div id="page-numbers" class="page-numbers"></div>
+                <button id="siguiente" class="btn btn-primary"><i class="fa-solid fa-chevron-right"></i></button>
+            </div>
+        </div>
+    </section>
+</div>
+
+<!-- Scripts -->
+<script src="{% static 'assets/js/scripts/medico.js' %}"></script>
+{%endblock%}

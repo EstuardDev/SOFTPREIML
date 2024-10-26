@@ -1,0 +1,267 @@
+{% extends "./sidebar.html" %}
+{% block title %} Paciente {% endblock %}
+
+{%block body%}
+{% load static %}
+<div class="content">
+    <!-- <section class="content-header">
+        <h1>Listado de Pacientes</h1>
+        <hr>
+    </section> -->
+
+    <section class="content-header">
+        <div class="filters">
+            <div class="row">
+                <div class="col-sm-12 col-md-12 col-lg-12 col-xl-12">
+                    <h1>Listado de Pacientes</h1>
+                    <hr>
+                    <div class="row align-items-center">
+                        <div class="col-sm-12 col-md-3 col-lg-3 col-xl-3">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control" id="filtroDni"
+                                    placeholder="Filtrar Nombre y/o DNI" minlength="8" maxlength="8">
+                                <label for="filtroDni">Filtrar DNI/Nombre</label>
+                            </div>
+                        </div>
+                        <div class="col-sm-12 col-md-3 col-lg-3 col-xl-3">
+                            <div class="form-floating mb-3">
+                                <select class="form-select" id="filtroEstado" aria-label="Estado">
+                                    <option value="">Seleccione un estado</option>
+                                    <option value="Activo">Activo</option>
+                                    <option value="Inactivo">Inactivo</option>
+                                </select>
+                                <label for="filtroEstado">Estado</label>
+                            </div>
+                        </div>
+                        <div class="col-sm-12 col-md-3 col-lg-3 col-xl-3">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control" id="filtroHistoriaC"
+                                    placeholder="Filtrar por fecha">
+                                <label for="filtroHistoriaC">Filtrar Historial Clínico</label>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <button type="button" class="btn btn-primary" data-bs-toggle="modal"
+                                data-bs-target="#exampleModalP">
+                                Agregar Paciente
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Modal -->
+    <div class="modal fade" id="exampleModalP" tabindex="-1" aria-labelledby="exampleModalPLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalPLabel">Agregar Paciente</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="form-Paciente" action="{% url 'guardarPaciente' %}" method="post">{% csrf_token %}
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" id="txtdni" name="txtdni" placeholder="Ingresar DNI"
+                                minlength="8" maxlength="8" required>
+                            <label for="txtdni">Ingresar DNI</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" id="txtnombre" name="txtnombre"
+                                placeholder="ingresar Nombres">
+                            <label for="txtnombre">Ingresar Nombre</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" id="txtapellido" name="txtapellido"
+                                placeholder="Ingresar Apellidos">
+                            <label for="txtapellido">Ingresar Apellidos</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" id="txtedad" name="txtedad" placeholder="">
+                            <label for="txtedad">Ingresar Edad</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" id="txtnumgestacion" name="txtnumgestacion"
+                                placeholder="">
+                            <label for="txtnumgestacion">Edad Gestacional (>20 semanas)</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <button type="submit" class="btn btn-primary text-while">Guardar</button>
+                            <button type="submit" class="btn btn-danger text-while btnLimpiar">Limpiar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para editar paciente -->
+    <div class="modal fade" id="editModalP" tabindex="-1" aria-labelledby="editModalPLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editModalPLabel">Editar Paciente</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="form-Epaciente" action="{% url 'editarPaciente' %}" method="post">
+                        {% csrf_token %}
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" id="txteditdni" name="txteditdni"
+                                value="{{paciente.dni}}" placeholder="Ingresar DNI" readonly />
+                            <label for="txteditdni">Ingresar DNI</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" id="txteditnombre" name="txteditnombre"
+                                value="{{paciente.nombre}}" placeholder="Ingresar Nombre" />
+                            <label for="txteditnombre">Ingresar Nombre</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" id="txteditapellido" name="txteditapellido"
+                                value="{{paciente.apellidos}}" placeholder="Ingresar Apellidos" />
+                            <label for="txteditapellido">Ingresar Apellidos</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" id="txteditedad" name="txteditedad"
+                                value="{{paciente.edad}}" placeholder="Ingresar DNI" />
+                            <label for="txteditedad">Ingresar Edad</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" id="txteditngestacion" name="txteditngestacion"
+                                value="{{paciente.numgestacion}}" placeholder="Ingresar Nombre" />
+                            <label for="txteditngestacion">Edad Gestacional >20 semanas</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <button type="submit" id="btnGuardarCambios" class="btn btn-primary text-while">
+                                Guardar
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para ver historial paciente -->
+    <div class="modal fade" id="historialPacienteModal" tabindex="-1" aria-labelledby="historialModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="historiaModalLabel">Historial del Paciente</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-subtitle">
+                    <h1 id="nombre-paciente"></h1>
+                </div>
+
+                <div class="modal-body">
+                    <div class="table-responsive">
+                        <table id="tablaVisualizarHpac" class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th style="text-align: center; vertical-align: middle">#</th>
+                                    <th style="text-align: center; vertical-align: middle">FECHA CONSULTA</th>
+                                    <th style="text-align: center; vertical-align: middle">EDAD GESTACIONAL</th>
+                                    <th style="text-align: center; vertical-align: middle">P. INTERGENÉSICO</th>
+                                    <th style="text-align: center; vertical-align: middle">EMBARAZO PAREJA</th>
+                                    <th style="text-align: center; vertical-align: middle">HIPERTENSIÓN CRÓNICA</th>
+                                    <th style="text-align: center; vertical-align: middle">PAS BASAL</th>
+                                    <th style="text-align: center; vertical-align: middle">PAD BASAL</th>
+                                    <th style="text-align: center; vertical-align: middle">SISTOLICA 1</th>
+                                    <th style="text-align: center; vertical-align: middle">DIASTOLICA 1</th>
+                                    <th style="text-align: center; vertical-align: middle">SISTOLICA 2</th>
+                                    <th style="text-align: center; vertical-align: middle">DIASTOLICA 2</th>
+                                    <th style="text-align: center; vertical-align: middle">TEST DE ASS</th>
+                                    <th style="text-align: center; vertical-align: middle">PROTEINURIA</th>
+                                    <th style="text-align: center; vertical-align: middle">TGO</th>
+                                    <th style="text-align: center; vertical-align: middle">TGP</th>
+                                    <th style="text-align: center; vertical-align: middle">CREATININA</th>
+                                    <th style="text-align: center; vertical-align: middle">UREA</th>
+                                    <th style="text-align: center; vertical-align: middle">FIBRINÓGENO</th>
+                                    <th style="text-align: center; vertical-align: middle">F. REGISTRO</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <section>
+        <!-- Tabla responsive -->
+        <div class="table-responsive">
+            <table id="tablaPaciente" class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>DNI</th>
+                        <th>NOMBRE</th>
+                        <th>APELLIDOS</th>
+                        <th>EDAD</th>
+                        <th>N° HISTORIA CLÍNICA</th>
+                        <th>EDAD GESTACIONAL</th>
+                        <th>ESTADO</th>
+                        <th colspan="3">ACCIONES</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Aquí se mostrarán los datos de los médicos -->
+                    {% for p in paciente %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ p.dni }}</td>
+                        <td>{{ p.nombre }}</td>
+                        <td>{{ p.apellidos }}</td>
+                        <td>{{ p.edad }}</td>
+                        <td>{{ p.numeroHistoriaClinica }}</td>
+                        <td>{{ p.numgestacion }}</td>
+                        <td>
+                            {% if p.estado == '1' %}
+                            <span class="badge bg-success">Activo</span>
+                            {% else %}
+                            <span class="badge bg-danger">Inactivo</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{% url 'historialPaciente' p.id %}" data-id="{{ p.id }}"
+                                class="btn btn-outline-info btnVisualizar" data-bs-toggle="modal"
+                                data-bs-target="#historialPacienteModal">
+                                <i class="fa-solid fa-eye"></i>
+                            </a>
+                            {% if p.estado == '1' %}
+                            <a href="{% url 'edicionPaciente' p.dni %}" data-dni="{{ p.dni }}"
+                                class="btn btn-outline-primary btnEditar" data-bs-toggle="modal"
+                                data-bs-target="#editModal">
+                                <i class="fa-solid fa-pen-to-square"></i>
+                            </a>
+                            {% else %}
+                            <a href="{% url 'activarPaciente' p.dni %}" class="btn btn-outline-success btnActivar">
+                                <i class="fa-solid fa-circle-check"></i>
+                            </a>
+                            {% endif %}
+                            <a href="{% url 'eliminarPaciente' p.dni %}" class="btn btn-outline-danger btnEliminar">
+                                <i class="fa-solid fa-prescription-bottle-medical"></i>
+                            </a>
+                        </td> <!-- resto de los datos -->
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <div id="pagination-controls">
+                <button id="anterior" class="btn btn-primary"><i class="fa-solid fa-chevron-left"></i></button>
+                <div id="page-numbers"></div>
+                <button id="siguiente" class="btn btn-primary"><i class="fa-solid fa-chevron-right"></i></button>
+            </div>
+        </div>
+    </section>
+</div>
+<!-- Scripts -->
+<script src="{% static 'assets/js/scripts/paciente.js' %}"></script>
+
+{%endblock%}

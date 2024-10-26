@@ -1,0 +1,56 @@
+{% extends "./sidebar.html" %}
+{% block title %} Reportes de Diagnósticos {% endblock %}
+{%block body%}
+{% load static %}
+
+<div class="content">
+    <section class="content-report">
+        <h2>Reportes Médicos</h2>
+        <hr>
+        <div class="row">
+            <div class="col-lg-3">
+                <label for="range-fecha"><b>Rango de Fechas:</b></label>
+                <input type="text" class="form-control" id="range-fecha">
+            </div>
+
+            <section>
+                <div class="table-responsive">
+                    <table id="tablaReportes" class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Médico</th>
+                                <th>Paciente</th>
+                                <th>Fecha</th>
+                                <th>Posibilidad de Riesgo</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for r in reportes%}
+                            <tr>
+                                <td>{{ forloop.counter }}</td>
+                                <td>{{ r.personal }}</td>
+                                <td>{{ r.paciente }}</td>
+                                <td>{{ r.fecha_prediccion|date:"d-m-Y" }}</td>
+                                <td>
+                                    {% if r.nivelriesgo == 'Leve' %}
+                                    <span class="badge bg-warning">{{ r.nivelriesgo }}</span>
+                                    {% elif r.nivelriesgo == 'Severa' %}
+                                    <span class="badge bg-danger">{{ r.nivelriesgo }}</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+    
+                    </table>
+                </div>
+            </section>
+        </div>
+    </section>
+</div>
+
+<!-- Scripts -->
+<script src="{% static 'assets/js/scripts/reporte.js' %}"></script>
+
+{%endblock%}

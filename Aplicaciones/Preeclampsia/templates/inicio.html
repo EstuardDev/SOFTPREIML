@@ -1,0 +1,280 @@
+{% extends "./sidebar.html" %}
+{% block title %} Inicio {% endblock %}
+{%block body%}
+{% load static %}
+
+<div class="content">
+    {% if user.groups.all.0.name == 'Administrador' %}
+    <section>
+        <div class="row">
+            <h5>Tareas Diarias </h5>
+            <div class="col-xs-12 col-sm-6 col-md-4 col-lg-4 col-xl-3 py-2">
+                <a href="{% url 'paciente' %}">
+                    <div class="card shadow">
+                        <div class="card-body">
+                            <div class="d-flex">
+                                <div class="flex-grow-1">
+                                    <p class="text-muted">Pacientes</p>
+                                    <h4 class="mb-0">{{ pacientes }}</h4>
+                                </div>
+                                <div class="flex-shrink-0 align-self-center">
+                                    <div class="mini-stat-icon avatar-sm rounded-circle bg-light">
+                                        <span class="avatar-title">
+                                            <i class="fa-solid fa-person-pregnant"></i>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            <div class="col-xs-12 col-sm-6 col-md-4 col-lg-4 col-xl-3 py-2">
+                <a href="{% url 'historial' %}">
+                    <div class="card shadow">
+                        <div class="card-body">
+                            <div class="d-flex">
+                                <div class="flex-grow-1">
+                                    <p class="text-muted">Total Historial Clínico</p>
+                                    <h4 class="mb-0">{{ historias_clinicas }}</h4>
+                                </div>
+                                <div class="flex-shrink-0 align-self-center">
+                                    <div class="mini-stat-icon avatar-sm rounded-circle bg-light">
+                                        <span class="avatar-title">
+                                            <i class="fa-solid fa-receipt"></i>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            <div class="col-xs-12 col-sm-6 col-md-4 col-lg-4 col-xl-3 py-2">
+                <a href="{% url 'medico' %}">
+                    <div class="card shadow">
+                        <div class="card-body">
+                            <div class="d-flex">
+                                <div class="flex-grow-1">
+                                    <p class="text-muted">Medicos</p>
+                                    <h4 class="mb-0">{{ medicos}}</h4>
+                                </div>
+
+                                <div class="flex-shrink-0 align-self-center">
+                                    <div class="mini-stat-icon avatar-sm rounded-circle bg-light">
+                                        <span class="avatar-title">
+                                            <i class="fa-solid fa-suitcase-medical"></i>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Modal para ver los diagnosticos del paciente -->
+    <div class="modal fade" id="histEvaluacionPacienteModal" tabindex="-1"
+        aria-labelledby="histEvaluacionPacienteModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="evaluacionModalLabel">Diagnosticos del Paciente</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-subtitle">
+                    <h1 id="nombre-paciente"></h1>
+                </div>
+
+                <div class="modal-body">
+                    <div class="table-responsive">
+                        <table id="tablaVisualizarDpac" class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>FECHA PREDICCION</th>
+                                    <th>RIESGO </th>
+                                    <th>NIVEL RIESGO</th>
+                                    <th>ESTADO</th>
+                                    <th>DETALLES</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <section>
+        <div class="row col-xs-12 col-sm-6 col-md-6 col-lg-6 col-xl-6">
+            <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 col-xl-12 py-2">
+                <div class="card-header">
+                    <h5 class="card-title">Ultimos Diagnósticos</h5>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Paciente</th>
+                                <th>Medico</th>
+                                <th>Fecha Registro</th>
+                                <th>Nivel Riesgo</th>
+                                <!-- <th>Estado</th> -->
+                                <th>Detalles</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for dg in diagnostico %}
+                            <tr>
+                                <td>{{forloop.counter}}</td>
+                                <td style="text-align: left;">{{ dg.paciente }}</td>
+                                <td>{{ dg.personal }}</td>
+                                <td>{{ dg.fecha_prediccion|date:"d-m-Y" }}</td>
+                                <td>
+                                    {% if dg.nivelriesgo == 'Leve' %}
+                                    <span class="badge bg-warning">{{ dg.nivelriesgo }}</span>
+                                    {% elif dg.nivelriesgo == 'Severa' %}
+                                    <span class="badge bg-danger">{{ dg.nivelriesgo }}</span>
+                                    {% endif %}
+                                </td>
+                                <!-- <td>
+                                    {% if dg.estado == 'Evaluado' %}
+                                    <span class="badge bg-success">Evaluado</span>
+                                    {% else %}
+                                    <span class="badge bg-danger">Proceso</span>
+                                    {% endif %}
+                                </td> -->
+                                <td>
+                                    <a href="{% url 'diagnosticosPaciente' dg.paciente.id %}"
+                                        data-id="{{ dg.paciente.id }}" class="btn btn-outline-info btnVisualizar"
+                                        data-bs-toggle="modal" data-bs-target="#histEvaluacionPacienteModal">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </a>
+                                </td>
+                                <!-- resto de los datos -->
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+    {% endif %}
+
+    {% if user.groups.all.0.name == 'Medico' %}
+
+    <section>
+        <div class="row col-xs-12 col-sm-12 col-md-12 col-lg-12 col-xl-12">
+            <h1>Tareas Diarias </h1>
+            <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6 col-xl-6 py-2">
+                <div class="card shadow">
+                    <div class="card-body">
+                        <div class="d-flex">
+                            <div class="flex-grow-1">
+                                <p class="text-muted">Pacientes</p>
+                                <h4 class="mb-0">{{ pacientes }}</h4>
+                            </div>
+                            <div class="flex-shrink-0 align-self-center">
+                                <div class="mini-stat-icon avatar-sm rounded-circle bg-light">
+                                    <span class="avatar-title">
+                                        <i class="fa-solid fa-person-pregnant"></i>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6 col-xl-6 py-2">
+                <div class="card shadow">
+                    <div class="card-body">
+                        <div class="d-flex">
+                            <div class="flex-grow-1">
+                                <p class="text-muted">Total Historial Clínico</p>
+                                <h4 class="mb-0">{{ historias_clinicas }}</h4>
+                            </div>
+
+                            <div class="flex-shrink-0 align-self-center">
+                                <div class="mini-stat-icon avatar-sm rounded-circle bg-light">
+                                    <span class="avatar-title">
+                                        <i class="fa-solid fa-receipt"></i>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <div class="row col-xs-12 col-sm-12 col-md-12 col-lg-6 col-xl-6">
+            <div class="col-12">
+                <div class="cardT shadow">
+                    <div class="card-header">
+                        <h5 class="card-title">Ultimos Diagnósticos</h5>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Paciente</th>
+                                    <!-- <th>Medico</th> -->
+                                    <th>Fecha Registro</th>
+                                    <th>Nivel Riesgo</th>
+                                    <!-- <th>Estado</th> -->
+                                    <!-- <th>Detalles</th> -->
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for dg in diagnostico %}
+                                <tr>
+                                    <td>{{forloop.counter}}</td>
+                                    <td style="text-align: left;">{{ dg.paciente }}</td>
+                                    <!-- <td>{{ dg.personal }}</td> -->
+                                    <td>{{ dg.fecha_prediccion|date:"d-m-Y" }}</td>
+                                    <td>
+                                        {% if dg.nivelriesgo == 'Leve' %}
+                                        <span class="badge bg-warning">{{ dg.nivelriesgo }}</span>
+                                        {% elif dg.nivelriesgo == 'Severa' %}
+                                        <span class="badge bg-danger">{{ dg.nivelriesgo }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <!-- <td>
+                                        {% if dg.estado == 'Evaluado' %}
+                                        <span class="badge bg-success">Evaluado</span>
+                                        {% else %}
+                                        <span class="badge bg-danger">Proceso</span>
+                                        {% endif %}
+                                    </td> -->
+                                    <!-- <td>
+                                        <button class="btn btn-primary"><i class="fa-solid fa-eye"></i></button>
+                                    </td> -->
+                                    <!-- resto de los datos -->
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    {% endif %}
+</div>
+<!-- Scripts -->
+<script src="{% static 'assets/js/scripts/inicio.js' %}"></script>
+
+{%endblock%}
