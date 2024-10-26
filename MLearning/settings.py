@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 
 import os
 from pathlib import Path
+import dj_database_url
 from decouple import config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -22,8 +23,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get('SECRET_KEY', default='ajksfhblias54hwsrg346fyoyaiwyfg')
-# 'django-insecure-74j0b_!t25c*v9lr^_@!=#i!kvg_v0(9f8w+lv$#f8l#&vc#8j'
+SECRET_KEY = config("SECRET_KEY")
+# ''
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = 'RENDER' not in os.environ
@@ -50,6 +51,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'Aplicaciones.Preeclampsia',
+    'whitenoise.runserver_nostatic',
 ]
 
 MIDDLEWARE = [
@@ -99,14 +101,7 @@ WSGI_APPLICATION = 'MLearning.wsgi.application'
 # }
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': config('DB_NAME'),  # Nombre de la base de datos
-        'USER': config('DB_USER'),  # Usuario de la base de datos
-        'PASSWORD': config('DB_PASSWORD'),  # Contraseña de la base de datos
-        'HOST': config('DB_HOST'),  # Host de la base de datos
-        'PORT': config('DB_PORT'),  # Puerto de la base de datos
-    }
+    'default': dj_database_url.parse(config("DATABASE_URL"))
 }
 
 
