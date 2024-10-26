@@ -31,21 +31,28 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'MLearning.settings')
 django.setup()
 from django.contrib.auth.models import User, Group
 
-username = 'Estuardjr'  # Cambia esto si lo deseas
-password = 'dinhor80'  # Cambia esto a una contraseña segura
-email = 'kenestr80@gmail.com'  # Cambia esto si lo deseas
+# Cambia estos valores a los que desees
+username = 'Estuardjr'
+password = 'dinhor80'
+email = 'kenestr80@gmail.com'  # Correo electrónico
 
-# Crear superusuario si no existe
-user, created = User.objects.get_or_create(username=username, defaults={'email': email, 'password': password})
+# Crear o actualizar superusuario
+user, created = User.objects.get_or_create(username=username, defaults={'email': email})
 if created:
-    user.set_password(password)  # Asegúrate de establecer la contraseña correctamente
+    user.set_password(password)  
+    user.is_superuser = True 
+    user.is_staff = True 
     user.save()
     print(f'Superusuario {username} creado.')
 else:
-    print(f'El superusuario {username} ya existe.')
+    # Si el usuario ya existe, asegurarse de que sea un superusuario
+    user.is_superuser = True
+    user.is_staff = True
+    user.save()
+    print(f'El superusuario {username} ya existe y ha sido actualizado.')
 
 # Agregar el superusuario al grupo de Administrador
-admin_group = Group.objects.get(name='Administrador')
+admin_group, _ = Group.objects.get_or_create(name='Administrador')
 user.groups.add(admin_group)
 "
 
