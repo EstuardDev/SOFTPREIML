@@ -69,4 +69,4 @@ for session in Session.objects.all():
 # 6. Iniciar la aplicación con el puerto proporcionado por Render
 PORT=${PORT:-8000}
 echo "Iniciando Gunicorn en el puerto $PORT"
-gunicorn MLearning.wsgi --bind 0.0.0.0:$PORT
+#gunicorn MLearning.wsgi --bind 0.0.0.0:$PORT
