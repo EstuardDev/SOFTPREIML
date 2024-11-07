@@ -18,9 +18,11 @@
                                 <th>Paciente</th>
                                 <th>Fecha</th>
                                 <th>Posibilidad de Riesgo</th>
+                                <th>Tiempo Promedio de Detección</th>
                             </tr>
                         </thead>
                         <tbody>
+                            {% if request.user.is_superuser %}
                             {% for r in reportes%}
                             <tr>
                                 <td>{{ forloop.counter }}</td>
@@ -28,14 +30,44 @@
                                 <td>{{ r.paciente }}</td>
                                 <td>{{ r.fecha_prediccion|date:"d-m-Y" }}</td>
                                 <td>
-                                    {% if r.nivelriesgo == 'Leve' %}
+                                    {% if r.nivelriesgo == 'No Preeclampsia' %}
+                                    <span class="badge bg-success">{{ r.nivelriesgo }}</span>
+                                    {% elif r.nivelriesgo == 'Preeclampsia' %}
+                                    <span class="badge bg-info">{{ r.nivelriesgo }}</span>
+                                    {% elif r.nivelriesgo == 'Leve' %}
                                     <span class="badge bg-warning">{{ r.nivelriesgo }}</span>
                                     {% elif r.nivelriesgo == 'Severa' %}
                                     <span class="badge bg-danger">{{ r.nivelriesgo }}</span>
                                     {% endif %}
                                 </td>
+                                <td>{{ r.tiempo_deteccion_formateado }}</td>
                             </tr>
                             {% endfor %}
+                            {% else %}
+                            <!-- Si el usuario es médico, muestra solo sus reportes -->
+                            {% for r in reportes %}
+                            {% if r.personal == user.personal %}
+                            <tr>
+                                <td>{{ forloop.counter }}</td>
+                                <td>{{ r.personal }}</td>
+                                <td>{{ r.paciente }}</td>
+                                <td>{{ r.fecha_prediccion|date:"d-m-Y" }}</td>
+                                <td>
+                                    {% if r.nivelriesgo == 'No Preeclampsia' %}
+                                    <span class="badge bg-success">{{ r.nivelriesgo }}</span>
+                                    {% elif r.nivelriesgo == 'Preeclampsia' %}
+                                    <span class="badge bg-info">{{ r.nivelriesgo }}</span>
+                                    {% elif r.nivelriesgo == 'Leve' %}
+                                    <span class="badge bg-warning">{{ r.nivelriesgo }}</span>
+                                    {% elif r.nivelriesgo == 'Severa' %}
+                                    <span class="badge bg-danger">{{ r.nivelriesgo }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ r.tiempo_deteccion_formateado }}</td>
+                            </tr>
+                            {% endif %}
+                            {% endfor %}
+                            {% endif %}
                         </tbody>
     
                     </table>
