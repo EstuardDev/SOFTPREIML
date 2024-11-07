@@ -145,8 +145,24 @@ def inicio(request):
     historias_clinicas = HistoriaClinica.objects.all().count()
     # diagnosticos = Diagnostico.objects.all().order_by('-id')[:5]  # Obtener los últimos 5 diagnósticos
     diagnosticos = Diagnostico.objects.order_by('paciente', '-fecha_prediccion').distinct('paciente')[:5]
+    
+    # Calcular los indicadores
+    proporcion_riesgo = calcular_proporcion_riesgo().get("PR", 0)
+    tasa_intervencion_efectiva = calcular_intervencion_efectiva().get("TIE", 0)
+    tiempo_promedio_deteccion = calcular_tiempo_promedio_deteccion()
+    casos_severa_a_leve = calcular_casos_severa_a_leve()
+    
+    contexto = {
+        'proporcion_riesgo': proporcion_riesgo,
+        'tasa_intervencion_efectiva': tasa_intervencion_efectiva,
+        'tiempo_promedio_deteccion': tiempo_promedio_deteccion["TPD_formateado"],
+        'tiempo_promedio_deteccion_segundos': tiempo_promedio_deteccion["TPD_segundos"],
+        'casos_severa_a_leve': casos_severa_a_leve["casos_severa_a_leve"],
+        'total_pacientes_con_severa': casos_severa_a_leve["total_pacientes_con_severa"],
+        'porcentaje_severa_a_leve': casos_severa_a_leve["porcentaje_severa_a_leve"]
+    }
 
-    return render(request, "inicio.html", {"pacientes": pacientes, "medicos": medicos, "historias_clinicas": historias_clinicas, "diagnostico": diagnosticos})
+    return render(request, "inicio.html", {"pacientes": pacientes, "medicos": medicos, "historias_clinicas": historias_clinicas, "diagnostico": diagnosticos} | contexto)
 
 # -------------------- VISTAS PARA PERSONAL MEDICOS --------------------
 @login_required
