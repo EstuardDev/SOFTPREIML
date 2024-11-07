@@ -1,15 +1,5 @@
 document.addEventListener("DOMContentLoaded", function () {
 
-    var date_range = null;
-
-    // new DataTable('#tablaReportes', {
-    //     lengthMenu: [[5, 10, 15, 20], [5, 10, 15, 20]],
-    //     pageLength: 5,
-    //     language: {
-    //         url: '//cdn.datatables.net/plug-ins/2.1.8/i18n/es-ES.json',
-    //     },
-    // });
-    /*var table =*/ 
     $('#tablaReportes').DataTable({
         lengthMenu: [5, 10, 15, 20],
         pageLength: 10,
@@ -57,26 +47,261 @@ document.addEventListener("DOMContentLoaded", function () {
         },
     });
 
-    function generarReporte() {
-        var parametros = {
-            'action' : 'buscarReporte',            
-            'start_date' : '21-10-2024',            
-            'end_date' : '21-10-2024',            
-        };
+    var proporcionRiesgo = parseFloat(document.getElementById('proporcionRiesgoChart').getAttribute('data-pr')) || 0;
+    var tasaIntervencion = parseFloat(document.getElementById('tasaIntervencionChart').getAttribute('data-tie')) || 0;
+    var tiempoPromedioDeteccion = parseFloat(document.getElementById('tiempoPromedioDeteccionChart').getAttribute('data-tpd')) || 0;
+    var porcentajeSeveraLeve = parseFloat(document.getElementById('casosSeveraLeveChart').getAttribute('data-porcentaje')) || 0;
 
-        if(date_range === null){
-            parametros['start_date'] = date_range.startDate.format('DD-MM-YYYY');
-            parametros['end_date'] = date_range.endDate.format('DD-MM-YYYY');
-        }
+    var barColor;
+    if (porcentajeSeveraLeve >= 80) {
+        barColor = '#198754'; 
+    } else if (porcentajeSeveraLeve >= 50) {
+        barColor = '#FFC107'; 
+    } else {
+        barColor = '#ff4500'; 
     }
 
-    $("#range-fecha").daterangepicker({
-        opens: "left",
-        locale: {
-            format: "DD-MM-YYYY",
+    var severaLeveChartDom = document.getElementById('casosSeveraLeveChart');
+    var severaLeveChart = echarts.init(severaLeveChartDom);
+    var severaLeveOption = {
+        title: {
+            text: 'Preeclampsia Severa Controlado',
+            left: 'center'
         },
-    }).on('apply.daterangepicker', function(ev, picker) {
-        date_range = picker;
-        console.log(date_range);
+        xAxis: {
+            type: 'category',
+            data: ['Cambio a Leve']
+        },
+        yAxis: {
+            type: 'value',
+            max: 100
+        },
+        toolbox: {
+            show: true,
+            feature: {
+                mark: { show: true },
+                restore: { show: true },
+                saveAsImage: { show: true }
+            }
+        },
+        series: [
+            {
+                name: 'Cambio de Severa a Leve',
+                type: 'bar',
+                data: [porcentajeSeveraLeve],
+                label: {
+                    show: true,
+                    position: 'inside', 
+                    formatter: '{c}%', 
+                    fontSize: 35,
+                    fontWeight: 'bold',
+                    color: '#fff' 
+                },
+                itemStyle: {
+                    color: barColor,  
+                    borderRadius: [10, 10, 0, 0]  
+                }
+            }
+        ]
+    };
+    severaLeveChart.setOption(severaLeveOption);
+
+    var tpdChartDom = document.getElementById('tiempoPromedioDeteccionChart');
+    var tpdChart = echarts.init(tpdChartDom);
+    var tpdOption = {
+        title: {
+            text: 'Tiempo Promedio de Detección (TPD)',
+            left: 'center'
+        },
+        tooltip: {
+            formatter: function () {
+                var totalSeconds = tiempoPromedioDeteccion;
+                var days = Math.floor(totalSeconds / (24 * 3600));
+                totalSeconds %= 24 * 3600;
+                var hours = Math.floor(totalSeconds / 3600);
+                totalSeconds %= 3600;
+                var minutes = Math.floor(totalSeconds / 60);
+                var seconds = totalSeconds % 60;
+                return `TPD: ${days}d ${hours}h ${minutes}m ${seconds}s`;
+            }
+        },
+        series: [
+            {
+                name: 'Tiempo Promedio de Detección',
+                type: 'gauge',
+                max: 2592000, 
+                axisLine: {
+                    lineStyle: {
+                        color: [
+                            [0.25, '#198754'],
+                            [0.5, '#FFC107'], 
+                            [1, '#DC3545']
+                        ],
+                        width: 20
+                    }
+                },
+                axisLabel: {
+                    fontSize: 8,
+                    distance: 25,
+                    formatter: function (value) {
+                        var days = Math.floor(value / (24 * 3600));
+                        var hours = Math.floor((value % (24 * 3600)) / 3600);
+                        return `${days}d ${hours}h`;
+                    }
+                },
+                detail: {
+                    formatter: function (value) {
+                        var totalSeconds = value;
+                        var days = Math.floor(totalSeconds / (24 * 3600));
+                        totalSeconds %= 24 * 3600;
+                        var hours = Math.floor(totalSeconds / 3600);
+                        totalSeconds %= 3600;
+                        var minutes = Math.floor(totalSeconds / 60);
+                        var seconds = totalSeconds % 60;
+                        return `${days}d ${hours}h ${minutes}m ${seconds}s`;
+                    },
+                    fontSize: 14,
+                    color: '#000',
+                },
+                data: [{ value: tiempoPromedioDeteccion, name: 'TPD' }]
+            }
+        ]
+    };
+    tpdChart.setOption(tpdOption);
+
+    var prChartDom = document.getElementById('proporcionRiesgoChart');
+    if (prChartDom) {
+        var prChart = echarts.init(prChartDom);
+        var prOption = {
+            title: {
+                text: 'Proporción de Riesgo (PR)',
+                left: 'center'
+            },
+            tooltip: {
+                trigger: 'item'
+            },
+            legend: {
+                top: 'bottom'
+            },
+            toolbox: {
+                show: true,
+                feature: {
+                    mark: { show: true },
+                    dataView: { show: true, readOnly: true },
+                    restore: { show: true },
+                    saveAsImage: { show: true }
+                }
+            },
+            series: [
+                {
+                    name: 'Proporción de Riesgo',
+                    type: 'pie',
+                    radius: ['40%', '70%'],
+                    avoidLabelOverlap: false,
+                    padAngle: 4,
+                    itemStyle: {
+                        borderRadius: 10,
+                        borderColor: '#fff',
+                        borderWidth: 2
+                    },
+                    label: {
+                        show: true,
+                        position: 'center',
+                        formatter: '{d}%',
+                        fontSize: 30,
+                        fontWeight: 'bold',
+                        color: '#333'
+                    },
+                    emphasis: {
+                        label: {
+                            show: true,
+                            fontSize: 40, 
+                            fontWeight: 'bold',
+                            formatter: '{d}%',  
+                            color: '#333'
+                        }
+                    },
+                    labelLine: {
+                        show: false 
+                    },
+                    data: [
+                        { value: proporcionRiesgo, name: 'Riesgo de Preeclampsia', itemStyle: { color: '#DC3545' } },
+                        { value: 100 - proporcionRiesgo, name: 'Sin Riesgo', itemStyle: { color: '#198754' } }
+                    ]
+                }
+            ]
+        };
+
+        prChart.on('mouseover', function (params) {
+            if (params.dataIndex === 1) { 
+                prOption.series[0].label.show = false;
+                prChart.setOption(prOption, true);
+            }
+        });
+
+        prChart.on('mouseout', () => {
+            prOption.series[0].label.show = true;
+            prChart.setOption(prOption, true);
+        });
+
+        prChart.setOption(prOption);
+    }
+
+    var tieChartDom = document.getElementById('tasaIntervencionChart');
+    if (tieChartDom) {
+        var tieChart = echarts.init(tieChartDom);
+        var tieOption = {
+            title: {
+                text: 'Tasa de Intervención Efectiva (TIE)',
+                left: 'center'
+            },
+            xAxis: {
+                type: 'category',
+                data: ['TIE']
+            },
+            yAxis: {
+                type: 'value',
+                max: 100
+            },
+            toolbox: {
+                show: true,
+                feature: {
+                    mark: { show: true },
+                    restore: { show: true },
+                    saveAsImage: { show: true }
+                }
+            },
+            series: [
+                {
+                    name: 'Tasa de Intervención Efectiva',
+                    type: 'bar',
+                    data: [tasaIntervencion],
+                    label: {
+                        show: true,
+                        position: 'inside',  
+                        formatter: '{c}%',  
+                        fontSize: 35,
+                        fontWeight: 'bold',
+                        color: '#fff'
+                    },
+                    itemStyle: {
+                        color: '#5470c6',
+                        borderRadius: [10, 10, 0, 0]
+                    }
+                }
+            ]
+        };
+        tieChart.setOption(tieOption);
+    }
+
+    window.addEventListener('resize', function () {
+        tpdChart.resize();
+        if (prChart) {
+            prChart.resize();
+        }
+        if (tieChart) {
+            tieChart.resize();
+        }
     });
+
 });

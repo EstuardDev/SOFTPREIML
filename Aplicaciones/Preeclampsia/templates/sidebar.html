@@ -17,9 +17,6 @@
 
   <!-- Iconos -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
-  <!-- <link href="https://cdn.lineicons.com/4.0/lineicons.css" rel="stylesheet" />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-  <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'> -->
 
   <!-- DataTables (libreria para tablas) -->
   <link rel="stylesheet" href="{% static 'assets/dist/lib/DataTables/datatables.min.css' %}" />   
@@ -38,16 +35,6 @@
 <body class="theme-light">
   <div class="wrapper">
 
-    <!-- Menú flotante -->
-    <!-- <div id="menu-flotante" class="menu-flotante">
-      <a href="" id="boton-menu" class="btn btn-outline-primary boton-menu"><i class="fa-solid fa-globe"></i></a>
-      <div id="opciones-menu" class="opciones-menu">
-        <a href="#" class="opcion-menu" data-idioma="es"><b>ES</b></a>
-        <hr>
-        <a href="#" class="opcion-menu" data-idioma="en"><b>EN</b></a>
-      </div>
-    </div> -->
-
     <!-- sidebar -->
     <aside id="sidebar">
       <!-- Header Sidebar -->
@@ -63,7 +50,6 @@
           </a>
         </div>
         <button class="toggle-btn" type="button">
-          <!-- <span class="material-symbols-outlined">menu_open</span> -->
           <i class="fa-solid fa-bars"></i>
         </button>
       </div>
@@ -74,7 +60,6 @@
         {% if user.groups.all.0.name == 'Administrador' %}
         <li class="sidebar-item">
           <a href="{% url 'inicio' %}" class="sidebar-link">
-            <!-- <i class="fa-solid fa-house-laptop"></i> -->
             <i class="fa-solid fa-border-all"></i>
             <span>Inicio</span>
           </a>
@@ -115,7 +100,6 @@
         {% if user.groups.all.0.name == 'Medico' %}
         <li class="sidebar-item">
           <a href="{% url 'inicio' %}" class="sidebar-link">
-            <!-- <i class="fa-solid fa-house-laptop"></i> -->
             <i class="fa-solid fa-border-all"></i>
             <span>Inicio</span>
           </a>
@@ -138,46 +122,11 @@
             <span>Diagnóstico</span>
           </a>
         </li>
-        {% endif %}
-        <!-- <li class="sidebar-item">
-            <a
-              href="#"
-              class="sidebar-link collapsed has-dropdown"
-              data-bs-toggle="collapse"
-              data-bs-target="#auth"
-              aria-expanded="false"
-              aria-controls="auth"
-            >
-              <i class="lni lni-protection"></i>
-              <span>Auth</span>
-            </a>
-            <ul
-              id="auth"
-              class="sidebar-dropdown list-unstyled collapse"
-              data-bs-parent="#sidebar"
-            >
-              <li class="sidebar-item">
-                <a href="#" class="sidebar-link">Login</a>
-              </li>
-              <li class="sidebar-item">
-                <a href="#" class="sidebar-link">Register</a>
-              </li>
-            </ul>
-          </li> -->
-        <!-- <li class="sidebar-item">
-          <a href="#" class="sidebar-link">
-            <i class="lni lni-cog"></i>
-            <span>Ajustes</span>
-          </a>
-        </li> -->
+        {% endif %}       
       </ul>
       <hr>
       <!-- Footer Sidebar-Nav -->
       <div class="sidebar-footer">
-        <!-- <a href="" class="sidebar-link">
-          <i class="español"><strong>ES</strong></i>
-          <i class="ingles" hidden=""><strong>EN</strong></i>
-        </a> -->
         <a class="sidebar-link">
           <li class="mode">
             <div class="sun-moon">
@@ -210,10 +159,6 @@
           <a class="navbar-brand" href="{% url 'inicio' %}">
             <h2>Dashboard</h2>
           </a>
-          <!-- <form class="d-flex ms-center">
-            <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
-            <button class="btn btn-outline-primary" type="submit">Buscar</button>
-          </form> -->
           <div class="d-flex justify-content-end align-items-center">
             <a href="{% url 'perfil' %}" class="navbar-brand">
               {% if request.user.personal %}
@@ -226,13 +171,7 @@
               <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                 <i class="fa-solid fa-user-nurse"></i>
               </button>
-              <ul class="dropdown-menu dropdown-menu-end">
-                <!-- <li>
-                  <a class="dropdown-item dropdown-item-centered" href="#">
-                    <i class="fa-solid fa-bell"></i>
-                    Notificación
-                  </a>
-                </li> -->
+              <ul class="dropdown-menu dropdown-menu-end">                
                 <li>
                   <a class="dropdown-item dropdown-item-centered" href="{% url 'perfil' %}">
                     <i class="fa-solid fa-address-card"></i>
@@ -260,9 +199,6 @@
 
       <!-- footer -->
       <div class="footer fixed-footer">
-        <!-- {% block footer %}
-
-        {% endblock %} -->
         {% include "./footer.html" %}
       </div>
       <!-- Cierre del footer -->
@@ -288,7 +224,7 @@
   <!-- SweetAlert2 (independiente, pero puede usar jQuery) -->
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-  <!-- <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.1/dist/echarts.min.js"></script> -->
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.1/dist/echarts.min.js"></script>
 
   <!-- Script Personalizado -->
   <script src="{% static 'assets/js/script.js' %}"></script>

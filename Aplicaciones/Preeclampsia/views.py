@@ -1,9 +1,8 @@
 import joblib
 import os
 from django.conf import settings
-# from django.contrib import messages
+from datetime import timedelta
 from django.contrib.auth.models import User, Group
-# from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
@@ -15,69 +14,19 @@ from .models import Diagnostico
 
 # Create your views here.
 
-"""def base(request):
-    return render(request, 'base.html')"""
-
 # -------------------- VISTAS PARA LOGIN --------------------
 
-"""def listar_medicos(request):
-    try:
-        # Obtenemos el grupo 'Medico'
-        grupo_medico = Group.objects.get(name='Medico')
-        
-        # Filtramos los usuarios que pertenecen al grupo 'Medico'
-        medicos = User.objects.filter(groups=grupo_medico)
-        
-        lista_medicos = []
-        
-        for medico in medicos:
-            lista_medicos.append({
-                'username': medico.username,
-                'email': medico.email,
-                'grupo': 'Medico'
-            })
-        
-        return JsonResponse({
-            'success': True,
-            'medicos': lista_medicos
-        })
-    except Group.DoesNotExist:
-        return JsonResponse({
-            'success': False,
-            'message': 'El grupo Medico no existe.'
-        })
-    except Exception as e:
-        return JsonResponse({
-            'success': False,
-            'message': str(e)
-        })"""
-
 def reportesviews(request):
-    if request.method == 'POST':
-        start_date = request.POST.get('start_date')
-        end_date = request.POST.get('end_date')
-
-        # Aquí puedes realizar la lógica para filtrar los reportes según las fechas
-        reportes = Diagnostico.objects.filter(fecha_prediccion__range=[start_date, end_date])
-
-        # Convertir los reportes a un formato que puedas devolver como JSON
-        reportes_data = list(reportes.values(
-            'personal', 
-            'paciente', 
-            'fecha_prediccion', 
-            'nivelriesgo'
-        ))
-
-        return JsonResponse({'success': True, 'data': reportes_data})
-
-    # Si no es una solicitud POST, simplemente renderiza la página de reportes
     reportes = Diagnostico.objects.all()
-    return render(request, 'reportes.html', {"reportes": reportes})
-
-# def reportesviews(request):
-#     reportes = Diagnostico.objects.all()
-#     return render(request, 'reportes.html', {"reportes": reportes})
-
+    for reporte in reportes:
+        reporte.tiempo_deteccion_formateado = calcular_tiempo_deteccion(reporte)
+        
+    contexto = {
+        'reportes': reportes
+    }
+    
+    return render(request, 'reportes.html', contexto)
+    
 def loginviews(request):
     if request.method == 'POST':
         username = request.POST['username']
@@ -672,10 +621,6 @@ def eliminarHistorial(request, id):
     return JsonResponse(data)
 
 # -------------------- VISTAS PARA DIAGNOSTICOS --------------------
-# @login_required
-# def diagnosticoviews(request):
-#     diagnosticos = Diagnostico.objects.all() # Filtrar los diagnósticos según el personal relacionado
-#     return render(request, "diagnostico.html", {"diagnostico": diagnosticos})
 
 @login_required
 def diagnosticoviews(request):
@@ -934,3 +879,146 @@ def activarDiagnostico(request, id):
         "success": False,
         "message": "Método no permitido."
     })
+
+
+# -------------------- VISTAS PARA INDICADORES --------------------
+
+def calcular_indicadores(request):
+    TPD = calcular_tiempo_deteccion(Diagnostico.objects.first()).get("TPD", "00:00:00")
+    PR = calcular_proporcion_riesgo().get("PR", 0)
+    TIE = calcular_intervencion_efectiva().get("TIE", 0)
+    
+    context = {
+        'TPD': TPD,
+        'PR': PR,
+        'TIE': TIE
+    }
+    
+    return render(request, 'reportes.html', context)
+
+# 1. Cálculo del Tiempo Promedio de Detección por paciente(TPD)
+def calcular_tiempo_deteccion(diagnostico):
+    try:
+        tiempo_final = diagnostico.fecha_prediccion
+        historial = diagnostico.historia_clinica
+        tiempo_inicio = historial.fecharegistro
+
+        if tiempo_final and tiempo_inicio:
+            tiempo_deteccion = tiempo_final - tiempo_inicio
+            dias = tiempo_deteccion.days
+            horas, resto = divmod(tiempo_deteccion.seconds, 3600)
+            minutos, segundos = divmod(resto, 60)
+
+            if dias > 0:
+                return f"{dias}d {horas:02}h {minutos:02}m {segundos:02}s"
+            elif horas > 0:
+                return f"{horas:02}h {minutos:02}m {segundos:02}s"
+            else:
+                return f"{minutos:02}m {segundos:02}s"
+        else:
+            return "00:00:00"
+    except Exception:
+        return "00:00:00"
+
+# Cálculo del Tiempo Promedio de Detección nivel general(TPD)
+def calcular_tiempo_promedio_deteccion():
+    pacientes_ids = Diagnostico.objects.values_list('paciente', flat=True).distinct()
+    
+    total_tiempo_deteccion = timedelta(0) 
+    total_pacientes = 0      
+
+    for paciente_id in pacientes_ids:
+        primer_diagnostico = Diagnostico.objects.filter(paciente_id=paciente_id).order_by('fecha_prediccion').first()
+        
+        ultimo_diagnostico = Diagnostico.objects.filter(paciente_id=paciente_id).order_by('fecha_prediccion').last()
+        
+        if primer_diagnostico and ultimo_diagnostico:
+            tiempo_deteccion = ultimo_diagnostico.fecha_prediccion - primer_diagnostico.historia_clinica.fecharegistro
+            total_tiempo_deteccion += tiempo_deteccion  
+            total_pacientes += 1  
+
+    if total_pacientes > 0:
+
+        tiempo_promedio_deteccion = total_tiempo_deteccion / total_pacientes
+    else:
+        tiempo_promedio_deteccion = timedelta(0)  # Si no hay pacientes, el promedio es 0
+
+    dias = tiempo_promedio_deteccion.days
+    horas, resto = divmod(tiempo_promedio_deteccion.seconds, 3600)
+    minutos, segundos = divmod(resto, 60)
+
+    return {
+        "TPD_formateado": f"{dias}d {horas:02}h {minutos:02}m {segundos:02}s",
+        "TPD_segundos": tiempo_promedio_deteccion.total_seconds()
+    }
+
+# 2. Cálculo de la Proporción de Riesgo (PR)
+def calcular_proporcion_riesgo():
+    total_pacientes = Diagnostico.objects.count()    
+    
+    pacientes_en_riesgo = Diagnostico.objects.filter(nivelriesgo__in=["Preeclampsia", "Leve", "Severa"]).count()    
+    
+    if total_pacientes > 0:
+        PR = (pacientes_en_riesgo / total_pacientes) * 100
+    else:
+        PR = 0 
+
+    return {"PR": round(PR, 2)}
+
+# 3. Cálculo de la Tasa de Intervención Efectiva (TIE)
+def calcular_intervencion_efectiva():
+    pacientes_con_leve = Diagnostico.objects.filter(nivelriesgo="Leve").values_list('paciente', flat=True).distinct()
+    
+    total_leve = 0
+    sin_progresion = 0
+
+    for paciente_id in pacientes_con_leve:
+        diagnosticos_paciente = Diagnostico.objects.filter(paciente_id=paciente_id).order_by('fecha_prediccion')
+        
+        primer_diagnostico = diagnosticos_paciente.first()
+        if primer_diagnostico and primer_diagnostico.nivelriesgo == "Leve":
+            total_leve += 1
+            progreso_a_severa = False
+            
+            for diagnostico in diagnosticos_paciente:
+                if diagnostico.nivelriesgo == "Severa":
+                    progreso_a_severa = True
+                    break
+            
+            if not progreso_a_severa:
+                sin_progresion += 1
+   
+    TIE = (sin_progresion / total_leve) * 100 if total_leve > 0 else 0
+    return {"TIE": round(TIE, 2)}
+
+def calcular_casos_severa_a_leve():
+    casos_severa_a_leve = 0
+    total_pacientes_con_severa = 0
+
+    pacientes_ids = Diagnostico.objects.filter(nivelriesgo="Severa").values_list('paciente', flat=True).distinct()
+
+    for paciente_id in pacientes_ids:
+        diagnosticos = Diagnostico.objects.filter(paciente_id=paciente_id).order_by('fecha_prediccion')
+
+        tuvo_severa = False
+        cambio_a_leve = False
+
+        for diagnostico in diagnosticos:
+            if diagnostico.nivelriesgo == "Severa":
+                tuvo_severa = True
+            elif diagnostico.nivelriesgo == "Leve" and tuvo_severa:
+                cambio_a_leve = True
+                break 
+
+        if tuvo_severa:
+            total_pacientes_con_severa += 1
+        if cambio_a_leve:
+            casos_severa_a_leve += 1
+
+    porcentaje_severa_a_leve = (casos_severa_a_leve / total_pacientes_con_severa) * 100 if total_pacientes_con_severa > 0 else 0
+
+    return {
+        "casos_severa_a_leve": casos_severa_a_leve,
+        "total_pacientes_con_severa": total_pacientes_con_severa,
+        "porcentaje_severa_a_leve": porcentaje_severa_a_leve
+    }

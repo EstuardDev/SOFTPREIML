@@ -13,6 +13,8 @@ document.addEventListener('DOMContentLoaded', function () {
     const passwordToggle2 = document.getElementById('password-toggle2');
     const lockIcon = document.querySelector('.fa-lock');
 
+    let isSubmitting = false; // Bandera para evitar múltiples envíos
+
     /**
      * Funciones de validación del formulario de registro
      */
@@ -24,6 +26,10 @@ document.addEventListener('DOMContentLoaded', function () {
         }
         if (!/^\d+$/.test(dni)) {
             showWarning('El DNI solo puede contener dígitos');
+            return false;
+        }
+        if (/^(\d)\1+$/.test(dni)) { // Validación para evitar números repetidos
+            showWarning('Por favor, ingrese un DNI valido.');
             return false;
         }
         return true;
@@ -105,6 +111,8 @@ document.addEventListener('DOMContentLoaded', function () {
      */
     const handleLoginSubmit = (e) => {
         e.preventDefault();
+        if (isSubmitting) return; // Evitar múltiples envíos
+        isSubmitting = true;
 
         fetch('', {
             method: 'POST',
@@ -115,7 +123,11 @@ document.addEventListener('DOMContentLoaded', function () {
             body: new URLSearchParams(new FormData(formLogin)).toString()
         })
         .then(response => response.json())
-        .then(data => handleLoginResponse(data));
+        .then(data => {
+            handleLoginResponse(data);
+            isSubmitting = false; // Resetear la bandera al terminar la solicitud
+        })
+        .catch(() => isSubmitting = false); // Resetear la bandera si ocurre un error
     };
 
     /**
@@ -129,16 +141,17 @@ document.addEventListener('DOMContentLoaded', function () {
                 text: data.message,
                 icon: 'success',
                 background: '#e9efff',
-                confirmButtonColor: '#3085d6'
-            }).then((result) => {
-                if (result.isConfirmed) {
+                confirmButtonColor: '#3085d6',
+                allowOutsideClick: false, // Evitar cerrar al hacer clic fuera
+                willClose: () => {
+                    // Redirigir al usuario a la página de inicio al cerrar el mensaje
                     window.location.href = '/inicio';
                 }
             });
         } else {
             Swal.fire({
                 title: 'Error!',
-                text: data.message,
+                text: data.message.concat(' https://wa.me/ 935240562'),
                 icon: 'error',
                 background: '#f8d7da',
                 confirmButtonColor: '#d33'
@@ -152,6 +165,8 @@ document.addEventListener('DOMContentLoaded', function () {
      */
     const handleRegisterSubmit = (e) => {
         e.preventDefault();
+        if (isSubmitting) return; // Evitar múltiples envíos
+        isSubmitting = true;
 
         if (validarFormRegistro()) {
             fetch('/registrarPersonal/', {
@@ -163,8 +178,16 @@ document.addEventListener('DOMContentLoaded', function () {
                 body: new URLSearchParams(new FormData(formRegister)).toString()
             })
             .then(response => response.json())
-            .then(data => handleRegisterResponse(data))
-            .catch(error => handleErrorResponse(error));
+            .then(data => {
+                handleRegisterResponse(data);
+                isSubmitting = false; // Resetear la bandera al terminar la solicitud
+            })
+            .catch(error => {
+                handleErrorResponse(error);
+                isSubmitting = false; // Resetear la bandera si ocurre un error
+            });
+        } else {
+            isSubmitting = false; // Resetear la bandera si no pasa la validación
         }
     };
 
@@ -224,244 +247,4 @@ document.addEventListener('DOMContentLoaded', function () {
     formLogin.addEventListener('submit', handleLoginSubmit);
     formRegister.addEventListener('submit', handleRegisterSubmit);
 
-    // 6. Animaciones adicionales (comentadas si no se usan)
-    /* 
-    const logoImg = document.querySelector('.logo-img');
-    setInterval(function () {
-        logoImg.classList.add('animate');
-        setTimeout(function () {
-            logoImg.classList.remove('animate');
-        }, 4000); // Duración de la animación (4 segundos)
-    }, 10000); // Intervalo de tiempo entre animaciones (10 segundos) 
-    */
 });
-
-
-// document.addEventListener('DOMContentLoaded', function () {
-//     const dniInput = document.getElementById('dni');
-//     const nombreInput = document.getElementById('nombre');
-//     const apellidosInput = document.getElementById('apellidos');
-//     const formLogin = document.getElementById('form-login');
-//     const formRegister = document.getElementById('form-register');
-//     const registerLink = document.getElementById('register-link');
-//     const loginLink = document.getElementById('login-link');
-//     const passwordInput = document.getElementById('password');
-//     const passwordToggle = document.getElementById('password-toggle');
-//     const passwordToggle2 = document.getElementById('password-toggle2');
-//     const lockIcon = document.querySelector('.fa-lock');
-
-//     // VALIDAMOS CAMPOS DEL FORMULARIOD DE ERGISTOR
-//     const validateDNI = () => {
-//         const dni = dniInput.value.trim();
-//         if (dni.length !== 8) {
-//             Swal.fire({
-//                 icon: 'warning',
-//                 title: 'Advertencia',
-//                 text: 'El DNI debe tener 8 dígitos',
-//             });
-//             return false;
-//         }
-//         if (!/^\d+$/.test(dni)) {
-//             Swal.fire({
-//                 icon: 'warning',
-//                 title: 'Advertencia',
-//                 text: 'El DNI solo puede contener dígitos',
-//             });
-//             return false;
-//         }
-//         return true;
-//     };
-
-//     const validateNombre = () => {
-//         const nombre = nombreInput.value.trim();
-//         if (!/^[a-zA-ZáéíóúÁÉÍÓÚñÑ ]+$/.test(nombre)) {
-//             Swal.fire({
-//                 icon: 'warning',
-//                 title: 'Advertencia',
-//                 text: 'El nombre solo puede contener letras',
-//             });
-//             return false;
-//         }
-//         return true;
-//     };
-
-//     const validateApellidos = () => {
-//         const apellidos = apellidosInput.value.trim();
-//         if (!/^[a-zA-ZáéíóúÁÉÍÓÚñÑ ]+$/.test(apellidos)) {
-//             Swal.fire({
-//                 icon: 'warning',
-//                 title: 'Advertencia',
-//                 text: 'Los apellidos solo pueden contener letras',
-//             });
-//             return false;
-//         }
-//         return true;
-//     };
-
-//     const validarFormRegistro = () => {
-//         if (!validateDNI() || !validateNombre() || !validateApellidos()) {
-//             return false;
-//         }
-//         return true;
-//     };
-
-//     passwordInput.addEventListener('input', function () {
-//         if (passwordInput.value.length > 0) {
-//             lockIcon.style.display = 'none';
-//             if (passwordInput.type === 'password') {
-//                 passwordToggle.style.display = 'block';
-//                 passwordToggle2.style.display = 'none';
-//             } else {
-//                 passwordToggle.style.display = 'none';
-//                 passwordToggle2.style.display = 'block';
-//             }
-//         } else {
-//             lockIcon.style.display = 'block';
-//             passwordToggle.style.display = 'none';
-//             passwordToggle2.style.display = 'none';
-//         }
-//     });
-
-//     passwordToggle.addEventListener('click', function () {
-//         if (passwordInput.type === 'password') {
-//             passwordInput.type = 'text';
-//             passwordToggle.style.display = 'none';
-//             passwordToggle2.style.display = 'block';
-//         } else {
-//             passwordInput.type = 'password';
-//             passwordToggle.style.display = 'block';
-//             passwordToggle2.style.display = 'none';
-//         }
-//     });
-
-//     passwordToggle2.addEventListener('click', function () {
-//         if (passwordInput.type === 'password') {
-//             passwordInput.type = 'text';
-//             passwordToggle.style.display = 'block';
-//             passwordToggle2.style.display = 'none';
-//         } else {
-//             passwordInput.type = 'password';
-//             passwordToggle.style.display = 'block';
-//             passwordToggle2.style.display = 'none';
-//         }
-//     });
-
-//     registerLink.addEventListener('click', function (e) {
-//         e.preventDefault();
-//         formLogin.classList.add('d-none');
-//         formRegister.classList.remove('d-none');
-//         formLogin.reset();
-//         if (passwordInput.value.length > 0) {
-//             lockIcon.style.display = 'none';
-//             passwordToggle.style.display = 'block';
-//         } else {
-//             lockIcon.style.display = 'block';
-//             passwordToggle.style.display = 'none';
-//         }
-//     });
-
-//     loginLink.addEventListener('click', function (e) {
-//         e.preventDefault();
-//         formRegister.classList.add('d-none');
-//         formLogin.classList.remove('d-none');
-//         formRegister.reset();
-//     });
-
-//     formLogin.addEventListener('submit', function (e) {
-//         e.preventDefault();
-        
-//         fetch('', {
-//             method: 'POST',
-//             headers: {
-//                 'Content-Type': 'application/x-www-form-urlencoded',
-//                 'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-//             },
-//             body: new URLSearchParams(new FormData(formLogin)).toString()
-//         })
-//             .then(response => response.json())
-//             .then(data => {
-//                 if (data.success) {
-//                     Swal.fire({
-//                         title: 'Bienvenido a Softly!',
-//                         text: data.message,
-//                         icon: 'success',
-//                         background: '#e9efff',
-//                         confirmButtonColor: '#3085d6'
-//                     }).then((result) => {
-//                         if (result.isConfirmed) {
-//                             window.location.href = '/inicio';  // Redirige a la página de inicio
-//                         }
-//                     });
-//                 } else {
-//                     Swal.fire({
-//                         title: 'Error!',
-//                         text: data.message,
-//                         icon: 'error',
-//                         background: '#f8d7da',
-//                         confirmButtonColor: '#d33'
-//                     });
-//                 }
-//             });
-//     });
-
-//     // Manejador para el formulario de registro
-//     formRegister.addEventListener('submit', function (e) {
-//         e.preventDefault();
-
-//         if (validarFormRegistro()) {
-//             fetch('/registrarPersonal/', { 
-//                 method: 'POST',
-//                 headers: {
-//                     'Content-Type': 'application/x-www-form-urlencoded',
-//                     'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-//                 },
-//                 body: new URLSearchParams(new FormData(formRegister)).toString()
-//             })
-//                 .then(response => response.json())
-//                 .then(data => {
-//                     if (data.success) {
-//                         Swal.fire({
-//                             title: 'Registro Exitoso!',
-//                             text: data.message,
-//                             icon: 'success',
-//                             background: '#e9efff',
-//                             confirmButtonColor: '#3085d6'
-//                         }).then((result) => {
-//                             if (result.isConfirmed) {
-//                                 formRegister.reset();  // Limpiar los campos del formulario
-//                                 //window.location.reload();  // Redirige a la página de inicio o a otro lugar
-//                             }
-//                         });
-//                     } else {
-//                         Swal.fire({
-//                             title: 'Error en el Registro!',
-//                             text: data.message,
-//                             icon: 'error',
-//                             background: '#f8d7da',
-//                             confirmButtonColor: '#d33'
-//                         });
-//                     }
-//                 })
-//                 .catch(error => {
-//                     Swal.fire({
-//                         title: 'Error!',
-//                         text: 'Ocurrió un error inesperado.',
-//                         icon: 'error',
-//                         background: '#f8d7da',
-//                         confirmButtonColor: '#d33'
-//                     });
-//                     console.error('Error:', error);
-//                 });
-//         }
-//     });
-
-//     //  let logoImg = document.querySelector('.logo-img');
-
-//     /*setInterval(function () {
-//         logoImg.classList.add('animate');
-//         setTimeout(function () {
-//             logoImg.classList.remove('animate');
-//         }, 4000); // 5000ms = 5s (duración de la animación)
-//     }, 10000);*/ // 10000ms = 10s (tiempo de espera entre animaciones)
-
-// });

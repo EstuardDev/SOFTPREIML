@@ -75,6 +75,26 @@
         </div>
     </section>
 
+    <section>
+        <div class="row">
+            <h2>Indicadores de Salud</h2>
+            <br><br>
+            <div class="PR col-xs-12 col-sm-12 col-md-6 col-lg-6 col-xl-6">
+                <div id="proporcionRiesgoChart" data-pr="{{ proporcion_riesgo }}"></div>
+            </div>
+            <div class="TPD col-xs-12 col-sm-12 col-md-6 col-lg-6 col-xl-6">
+                <div id="tiempoPromedioDeteccionChart" data-tpd="{{ tiempo_promedio_deteccion_segundos }}">
+                </div>
+            </div>
+            <div class="TIE col-xs-12 col-sm-12 col-md-6 col-lg-6 col-xl-6">
+                <div id="tasaIntervencionChart" data-tie="{{ tasa_intervencion_efectiva }}"></div>
+            </div>
+            <div class="CSL col-xs-12 col-sm-12 col-md-6 col-lg-6 col-xl-6">
+                <div id="casosSeveraLeveChart" data-porcentaje="{{ porcentaje_severa_a_leve }}"></div>
+            </div>
+        </div>
+    </section>
+
     <!-- Modal para ver los diagnosticos del paciente -->
     <div class="modal fade" id="histEvaluacionPacienteModal" tabindex="-1"
         aria-labelledby="histEvaluacionPacienteModalLabel" aria-hidden="true">
@@ -126,7 +146,6 @@
                                 <th>Medico</th>
                                 <th>Fecha Registro</th>
                                 <th>Nivel Riesgo</th>
-                                <!-- <th>Estado</th> -->
                                 <th>Detalles</th>
                             </tr>
                         </thead>
@@ -144,13 +163,6 @@
                                     <span class="badge bg-danger">{{ dg.nivelriesgo }}</span>
                                     {% endif %}
                                 </td>
-                                <!-- <td>
-                                    {% if dg.estado == 'Evaluado' %}
-                                    <span class="badge bg-success">Evaluado</span>
-                                    {% else %}
-                                    <span class="badge bg-danger">Proceso</span>
-                                    {% endif %}
-                                </td> -->
                                 <td>
                                     <a href="{% url 'diagnosticosPaciente' dg.paciente.id %}"
                                         data-id="{{ dg.paciente.id }}" class="btn btn-outline-info btnVisualizar"
@@ -158,7 +170,6 @@
                                         <i class="fa-solid fa-eye"></i>
                                     </a>
                                 </td>
-                                <!-- resto de los datos -->
                             </tr>
                             {% endfor %}
                         </tbody>
@@ -217,6 +228,26 @@
     </section>
 
     <section>
+        <div class="row">
+            <h2>Indicadores de Salud</h2>
+            <br><br>
+            <div class="PR col-xs-12 col-sm-12 col-md-6 col-lg-6 col-xl-6">
+                <div id="proporcionRiesgoChart" data-pr="{{ proporcion_riesgo }}"></div>
+            </div>
+            <div class="TPD col-xs-12 col-sm-12 col-md-6 col-lg-6 col-xl-6">
+                <div id="tiempoPromedioDeteccionChart" data-tpd="{{ tiempo_promedio_deteccion_segundos }}">
+                </div>
+            </div>
+            <div class="TIE col-xs-12 col-sm-12 col-md-6 col-lg-6 col-xl-6">
+                <div id="tasaIntervencionChart" data-tie="{{ tasa_intervencion_efectiva }}"></div>
+            </div>
+            <div class="CSL col-xs-12 col-sm-12 col-md-6 col-lg-6 col-xl-6">
+                <div id="casosSeveraLeveChart" data-porcentaje="{{ porcentaje_severa_a_leve }}"></div>
+            </div>
+        </div>
+    </section>
+
+    <section>
         <div class="row col-xs-12 col-sm-12 col-md-12 col-lg-6 col-xl-6">
             <div class="col-12">
                 <div class="cardT shadow">
@@ -229,11 +260,8 @@
                                 <tr>
                                     <th>#</th>
                                     <th>Paciente</th>
-                                    <!-- <th>Medico</th> -->
                                     <th>Fecha Registro</th>
                                     <th>Nivel Riesgo</th>
-                                    <!-- <th>Estado</th> -->
-                                    <!-- <th>Detalles</th> -->
                                 </tr>
                             </thead>
                             <tbody>
@@ -241,7 +269,6 @@
                                 <tr>
                                     <td>{{forloop.counter}}</td>
                                     <td style="text-align: left;">{{ dg.paciente }}</td>
-                                    <!-- <td>{{ dg.personal }}</td> -->
                                     <td>{{ dg.fecha_prediccion|date:"d-m-Y" }}</td>
                                     <td>
                                         {% if dg.nivelriesgo == 'Leve' %}
@@ -250,17 +277,6 @@
                                         <span class="badge bg-danger">{{ dg.nivelriesgo }}</span>
                                         {% endif %}
                                     </td>
-                                    <!-- <td>
-                                        {% if dg.estado == 'Evaluado' %}
-                                        <span class="badge bg-success">Evaluado</span>
-                                        {% else %}
-                                        <span class="badge bg-danger">Proceso</span>
-                                        {% endif %}
-                                    </td> -->
-                                    <!-- <td>
-                                        <button class="btn btn-primary"><i class="fa-solid fa-eye"></i></button>
-                                    </td> -->
-                                    <!-- resto de los datos -->
                                 </tr>
                                 {% endfor %}
                             </tbody>
@@ -276,5 +292,6 @@
 </div>
 <!-- Scripts -->
 <script src="{% static 'assets/js/scripts/inicio.js' %}"></script>
+<script src="{% static 'assets/js/scripts/reporte.js' %}"></script>
 
 {%endblock%}
