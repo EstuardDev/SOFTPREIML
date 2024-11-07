@@ -713,8 +713,8 @@
                     <th>CREATININA</th>
                     <th>UREA</th>
                     <th>FIBRINÓGENO</th>
-                    <!-- <th style="text-align: center; vertical-align: middle">F. REGISTRO</th> -->
-                    <th style="text-align: center; vertical-align: middle" colspan="2">ACCIONES</th>
+                    <th>F. REGISTRO</th>
+                    <th colspan="2">ACCIONES</th>
                 </tr>
             </thead>
             <tbody>
@@ -741,7 +741,7 @@
                     <td>{{ hc.creatinina }}</td>
                     <td>{{ hc.urea }}</td>
                     <td>{{ hc.fibrinogeno }}</td>
-                    <!-- <td>{{ hc.fecharegistro|date:"d-m-Y H:i A" }}</td> -->
+                    <td>{{ hc.fecharegistro|date:"d-m-Y H:i A" }}</td>
                     <td>
                         <a href="{% url 'edicionHistorial' hc.id %}" data-id="{{ hc.id }}"
                             class="btn btn-outline-primary btnEditar">
