@@ -618,19 +618,28 @@
     <div class="table-responsive">
         <table id="tablaDiagnostico" class="table table-striped table-md">
             <thead>
+                {% if request.user.is_superuser %}
                 <tr>
                     <th>#</th>
-                    <!-- <th>ID</th> -->
                     <th>PACIENTE</th>
-                    <!-- <th>HISTORIAL</th> -->
                     <th>MEDICO</th>
                     <th>F. REGISTRO</th>
                     <th>PAM (mmHg)</th>
-                    <th>NIVEL DE RIESGO</th>
-                    <!-- <th>DETALLES</th> -->
+                    <th>POSIBILIDAD DE RIESGO</th>
                     <th>ESTADO</th>
                     <th colspan="2">ACCIONES</th>
                 </tr>
+                {% else %}
+                <tr>
+                    <th>#</th>
+                    <th>PACIENTE</th>
+                    <th>F. REGISTRO</th>
+                    <th>PAM (mmHg)</th>
+                    <th>POSIBILIDAD DE RIESGO</th>
+                    <th>ESTADO</th>
+                    <th colspan="2">ACCIONES</th>
+                </tr>
+                {% endif %}
             </thead>
             <tbody>
                 <!-- Aquí mostramos los datos de los emdicos -->
@@ -638,20 +647,21 @@
                 {% for dg in diagnostico %}
                 <tr>
                     <td>{{ forloop.counter }}</td>
-                    <!-- <td>{{ dg.id }}</td> -->
                     <td style="text-align: left;">{{ dg.paciente }}</td>
-                    <!-- <td>{{ dg.historia_clinica.paciente.numeroHistoriaClinica }}</td> -->
                     <td>{{ dg.personal }}</td>
                     <td>{{ dg.fecha_prediccion|date:"d-m-Y H:i A" }}</td>
                     <td>{{ dg.riesgo }}</td>
                     <td>
-                        {% if dg.nivelriesgo == 'Leve' %}
+                        {% if dg.nivelriesgo == 'No Preeclampsia' %}
+                        <span class="badge bg-success">{{ dg.nivelriesgo }}</span>
+                        {% elif dg.nivelriesgo == 'Preeclampsia' %}
+                        <span class="badge bg-info">{{ dg.nivelriesgo }}</span>
+                        {% elif dg.nivelriesgo == 'Leve' %}
                         <span class="badge bg-warning">{{ dg.nivelriesgo }}</span>
                         {% elif dg.nivelriesgo == 'Severa' %}
                         <span class="badge bg-danger">{{ dg.nivelriesgo }}</span>
                         {% endif %}
                     </td>
-                    <!-- <td>{{ dg.detalles }}</td> -->
                     <td>
                         {% if dg.estado == 'Evaluado' %}
                         <span class="badge bg-success">Evaluado</span>
@@ -692,18 +702,19 @@
                 <tr>
                     <td>{{ forloop.counter }}</td>
                     <td style="text-align: left;">{{ dg.paciente }}</td>
-                    <!-- <td>{{ dg.historia_clinica.paciente.numeroHistoriaClinica }}</td> -->
-                    <td>{{ dg.personal }}</td>
                     <td>{{ dg.fecha_prediccion|date:"d-m-Y H:i A" }}</td>
                     <td>{{ dg.riesgo }}</td>
                     <td>
-                        {% if dg.nivelriesgo == 'Leve' %}
+                        {% if dg.nivelriesgo == 'No Preeclampsia' %}
+                        <span class="badge bg-success">{{ dg.nivelriesgo }}</span>
+                        {% elif dg.nivelriesgo == 'Preeclampsia' %}
+                        <span class="badge bg-info">{{ dg.nivelriesgo }}</span>
+                        {% elif dg.nivelriesgo == 'Leve' %}
                         <span class="badge bg-warning">{{ dg.nivelriesgo }}</span>
                         {% elif dg.nivelriesgo == 'Severa' %}
                         <span class="badge bg-danger">{{ dg.nivelriesgo }}</span>
                         {% endif %}
                     </td>
-                    <!-- <td>{{ dg.detalles }}</td> -->
                     <td>
                         {% if dg.estado == 'Evaluado' %}
                         <span class="badge bg-success">Evaluado</span>
