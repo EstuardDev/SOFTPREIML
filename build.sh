@@ -1,6 +1,9 @@
 #!/bin/bash
 set -o errexit  # Salir si ocurre algún error
 
+# Configurar DJANGO_SETTINGS_MODULE antes de ejecutar cualquier comando
+export DJANGO_SETTINGS_MODULE="MLearning.settings"
+
 # 1. Instalar las dependencias
 pip install -r requirements.txt
 
@@ -12,9 +15,7 @@ python manage.py migrate
 
 # 4. Crear grupos
 python -c "
-import os
 import django
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'MLearning.settings')
 django.setup()
 from django.contrib.auth.models import Group
 
@@ -25,14 +26,10 @@ Group.objects.get_or_create(name='Medico')
 
 # 5. Crear superusuario y agregarlo al grupo de Administrador, eliminando sesión activa si existe
 python -c "
-import os
 import django
+django.setup()
 from django.contrib.sessions.models import Session
 from django.contrib.auth.models import User, Group
-from django.conf import settings
-
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'MLearning.settings')
-django.setup()
 
 # Cambia estos valores a los que desees
 username = 'Estuardjr'
@@ -48,7 +45,6 @@ if created:
     user.save()
     print(f'Superusuario {username} creado.')
 else:
-    # Si el usuario ya existe, asegurarse de que sea un superusuario
     user.is_superuser = True
     user.is_staff = True
     user.save()
@@ -66,7 +62,7 @@ for session in Session.objects.all():
         print('Sesión activa del superusuario eliminada.')
 "
 
-# 6. Iniciar la aplicación con el puerto proporcionado por Render
+# 6. Iniciar la aplicación con Gunicorn en el puerto proporcionado por Render
 PORT=${PORT:-8000}
 echo "Iniciando Gunicorn en el puerto $PORT"
-#gunicorn MLearning.wsgi --bind 0.0.0.0:$PORT
+# gunicorn MLearning.wsgi --bind 0.0.0.0:$PORT
