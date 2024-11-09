@@ -65,7 +65,7 @@ document.addEventListener("DOMContentLoaded", function () {
     var severaLeveChart = echarts.init(severaLeveChartDom);
     var severaLeveOption = {
         title: {
-            text: 'Preeclampsia Severa Controlado',
+            text: 'Riesgo Severo Controlado',
             left: 'center'
         },
         xAxis: {
@@ -301,6 +301,9 @@ document.addEventListener("DOMContentLoaded", function () {
         }
         if (tieChart) {
             tieChart.resize();
+        }
+        if (severaLeveChart) {
+            severaLeveChart.resize();
         }
     });
 

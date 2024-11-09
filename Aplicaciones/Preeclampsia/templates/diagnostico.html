@@ -37,12 +37,21 @@
                                 <label for="filtroFecha">Filtrar por fecha</label>
                             </div>
                         </div>
+                        {% if request.user.is_superuser %}
+                        <div class="col-auto">
+                            <button type="button" class="btn btn-primary" data-bs-toggle="modal"
+                                data-bs-target="#exampleModal" disabled>
+                                Evaluar Paciente
+                            </button>
+                        </div>
+                        {% else %}
                         <div class="col-auto">
                             <button type="button" class="btn btn-primary" data-bs-toggle="modal"
                                 data-bs-target="#exampleModal">
                                 Evaluar Paciente
                             </button>
                         </div>
+                        {% endif %}
                     </div>
                 </div>
             </div>

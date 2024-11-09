@@ -29,10 +29,8 @@ SECRET_KEY = config("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = 'RENDER' not in os.environ
 
-# Actualiza ALLOWED_HOSTS para incluir tu dominio
 ALLOWED_HOSTS = ['softpreiml.onrender.com']
 
-# Si deseas permitir también el acceso local durante el desarrollo
 ALLOWED_HOSTS += ['localhost', '127.0.0.1']
 
 RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
