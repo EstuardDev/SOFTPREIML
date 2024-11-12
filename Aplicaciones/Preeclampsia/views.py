@@ -177,10 +177,13 @@ def guardarMedico(request):
             nombre = request.POST['txtnombre']
             apellidos = request.POST['txtapellido']
             
+            if Personal.objects.filter(dni=dni).exists():
+                return JsonResponse({'success': False, 'message': 'El DNI ya existe. Por favor, ingrese un DNI diferente.'})
+            
             Personal.objects.create(dni=dni, nombre=nombre, apellidos=apellidos)
             return JsonResponse({'success': True, 'message': 'Médico registrado exitosamente.'})
         except Exception as e:
-            return JsonResponse({'success': False, 'message': str(e)})
+            return JsonResponse({'success': False, 'message': 'Ha ocurrido un error inesperado. Por favor, intente más tarde.'})
     return JsonResponse({'success': False, 'message': 'Método no permitido.'})
 
 def desactivarmedico(request, pk):
@@ -284,44 +287,24 @@ def pacienteviews(request):
 
 def verHistorialPaciente(request, id):
     try:
-        historialPac = HistoriaClinica.objects.filter(paciente=id).select_related('paciente')
-        paciente = Paciente.objects.get(id=id)
+        paciente = Paciente.objects.get(id=id, personal=request.user.personal)  # Filtra por personal autenticado
+        historialPac = HistoriaClinica.objects.filter(paciente=paciente).select_related('paciente')
         historial_list = list(historialPac.values(
-            'fechaconsulta',
-            'edadgestacional',
-            'periodointergenesico',
-            'embarazonuevopareja',
-            'hipertensioncronica',
-            'pasistolicabasal',
-            'padiastolicabasal',
-            'presionsistolica1',
-            'presiondiastolica1',
-            'presionsistolica2',
-            'presiondiastolica2',
-            'testdeass',
-            'proteinaorina',
-            'tgo',
-            'tgp',
-            'creatinina',
-            'urea',
-            'fibrinogeno',
-            'fecharegistro'
+            'fechaconsulta', 'edadgestacional', 'periodointergenesico', 'embarazonuevopareja',
+            'hipertensioncronica', 'pasistolicabasal', 'padiastolicabasal', 'presionsistolica1',
+            'presiondiastolica1', 'presionsistolica2', 'presiondiastolica2', 'testdeass',
+            'proteinaorina', 'tgo', 'tgp', 'creatinina', 'urea', 'fibrinogeno', 'fecharegistro'
         ))
         return JsonResponse({
             'success': True,
             'historialPac': historial_list,
-            'nombrePaciente': paciente.nombre, 
-            'apellidoPaciente': paciente.apellidos 
+            'nombrePaciente': paciente.nombre,
+            'apellidoPaciente': paciente.apellidos
         })
+    except Paciente.DoesNotExist:
+        return JsonResponse({'success': False, 'message': 'Paciente no encontrado.'})
     except HistoriaClinica.DoesNotExist:
         return JsonResponse({'success': False, 'message': 'Historial clínico no encontrado.'})
-    except Paciente.DoesNotExist:
-        return JsonResponse({'success': False, 'message': 'La paciente no fue encontrada.'})
-
-def pacientesActivos(request):
-    pacientesActivos = Paciente.objects.filter(estado='1')
-    print(pacientesActivos)
-    return render(request, "inicio.html", {"pacientesActivos": pacientesActivos})
 
 def generar_Nhistoriaclinica():
     ultimo_numero = Paciente.objects.all().order_by('-numeroHistoriaClinica').first()
@@ -337,15 +320,23 @@ def guardarPaciente(request):
             dni = request.POST['txtdni']
             nombre = request.POST['txtnombre']
             apellidos = request.POST['txtapellido']
-            edad = request.POST['txtedad']    
+            edad = request.POST['txtedad']
             numgestacion = request.POST['txtnumgestacion']
             numhistoriaclinica = generar_Nhistoriaclinica()
-            
-            Paciente.objects.create(dni=dni, nombre=nombre, apellidos=apellidos, edad=edad, 
-                                    numeroHistoriaClinica=numhistoriaclinica, numgestacion=numgestacion)
+
+            if Paciente.objects.filter(dni=dni).exists():
+                return JsonResponse({'success': False, 'message': 'El DNI ya existe. Por favor, ingrese un DNI diferente.'})
+
+            # Asigna el médico autenticado como el personal del paciente
+            personal = request.user.personal
+            Paciente.objects.create(
+                dni=dni, nombre=nombre, apellidos=apellidos, edad=edad,
+                numeroHistoriaClinica=numhistoriaclinica, numgestacion=numgestacion,
+                personal=personal
+            )
             return JsonResponse({'success': True, 'message': 'Paciente registrado exitosamente.'})
         except Exception as e:
-            return JsonResponse({'success': False, 'message': str(e)})
+            return JsonResponse({'success': False, 'message': 'Ha ocurrido un error inesperado. Por favor, intente más tarde.'})
     return JsonResponse({'success': False, 'message': 'Método no permitido.'})
 
 def edicionPaciente(request, dni):
@@ -376,7 +367,8 @@ def editarPaciente(request):
         edad = request.POST.get('txteditedad')
         numgestacion = request.POST.get('txteditngestacion')
         try:
-            paciente = Paciente.objects.get(dni=dni)
+            # Filtra por el personal autenticado
+            paciente = Paciente.objects.get(dni=dni, personal=request.user.personal)
             paciente.nombre = nombre
             paciente.apellidos = apellidos
             paciente.edad = edad
@@ -389,11 +381,11 @@ def editarPaciente(request):
         except Paciente.DoesNotExist:
             return JsonResponse({
                 "success": False,
-                "message": "No se pudo encontrar al paciente."
+                "message": "No se pudo encontrar al paciente o no tiene permisos para editarlo."
             })
     return JsonResponse({
         "success": False,
-        "message": "Paciente no permitido."
+        "message": "Método no permitido."
     })
 
 def buscarPaciente(request, dni):
@@ -419,8 +411,8 @@ def buscarPaciente(request, dni):
 def eliminarPaciente(request, dni):
     if request.method == 'DELETE':
         try:
-            paciente = Paciente.objects.get(dni=dni)
-            paciente.estado = 0
+            paciente = Paciente.objects.get(dni=dni, personal=request.user.personal)
+            paciente.estado = '0'
             paciente.save()
             return JsonResponse({
                 "success": True,
@@ -429,7 +421,7 @@ def eliminarPaciente(request, dni):
         except Paciente.DoesNotExist:
             return JsonResponse({
                 "success": False,
-                "message": "No se pudo encontrar al Paciente."
+                "message": "No se pudo encontrar el Paciente o no tiene permisos para inactivarlo."
             })
     return JsonResponse({
         "success": False,
@@ -439,8 +431,8 @@ def eliminarPaciente(request, dni):
 def activarPaciente(request, dni):
     if request.method == 'PATCH':
         try:
-            paciente = Paciente.objects.get(dni=dni)
-            paciente.estado = 1
+            paciente = Paciente.objects.get(dni=dni, personal=request.user.personal)  # Filtra por personal autenticado
+            paciente.estado = '1'
             paciente.save()
             return JsonResponse({
                 "success": True,
@@ -449,7 +441,7 @@ def activarPaciente(request, dni):
         except Paciente.DoesNotExist:
             return JsonResponse({
                 "success": False,
-                "message": "No se pudo encontrar el Paciente."
+                "message": "No se pudo encontrar el Paciente o no tiene permisos para activarlo."
             })
     return JsonResponse({
         "success": False,

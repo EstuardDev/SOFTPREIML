@@ -211,8 +211,8 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <!-- Aquí se mostrarán los datos de los médicos -->
                     {% for p in paciente %}
+                    {% if user.is_superuser or p.personal == user.personal %}
                     <tr>
                         <td>{{ forloop.counter }}</td>
                         <td>{{ p.dni }}</td>
@@ -237,7 +237,7 @@
                             {% if p.estado == '1' %}
                             <a href="{% url 'edicionPaciente' p.dni %}" data-dni="{{ p.dni }}"
                                 class="btn btn-outline-primary btnEditar" data-bs-toggle="modal"
-                                data-bs-target="#editModal">
+                                data-bs-target="#editModalP">
                                 <i class="fa-solid fa-pen-to-square"></i>
                             </a>
                             {% else %}
@@ -248,8 +248,9 @@
                             <a href="{% url 'eliminarPaciente' p.dni %}" class="btn btn-outline-danger btnEliminar">
                                 <i class="fa-solid fa-prescription-bottle-medical"></i>
                             </a>
-                        </td> <!-- resto de los datos -->
+                        </td>
                     </tr>
+                    {% endif %}
                     {% endfor %}
                 </tbody>
             </table>

@@ -9,6 +9,92 @@ document.addEventListener('DOMContentLoaded', function () {
     const filtroEstado = document.getElementById('filtro-estado');
     const filtroFecha = document.getElementById('filtro-fecha');
 
+    const dniInput = document.getElementById('txtdni');
+    const nombreInput = document.getElementById('txtnombre');
+    const apellidoInput = document.getElementById('txtapellido');
+
+    const editNombreInput = document.getElementById('txteditnombre');
+    const editApellidoInput = document.getElementById('txteditapellido');
+
+    let isSubmitting = false;
+
+    const validateDNI = () => {
+        const dni = dniInput.value.trim();
+        if (dni.length !== 8) {
+            showWarning('El DNI debe tener 8 dígitos.');
+            isSubmitting = false;
+            return false;
+        }
+        if (!/^\d+$/.test(dni)) {
+            showWarning('Por favor, ingresa un DNI válido (solo números).');
+            isSubmitting = false;
+            return false;
+        }
+        if (/^(\d)\1+$/.test(dni)) { // Validación para evitar números repetidos
+            showWarning('El DNI no puede contener dígitos repetidos. Ingrese un DNI válido.');
+            isSubmitting = false;
+            return false;
+        }
+        return true;
+    };
+
+    const validateNombre = () => {
+        const nombre = nombreInput.value.trim();
+        if (!/^[a-zA-ZáéíóúÁÉÍÓÚñÑ ]+$/.test(nombre)) {
+            showWarning('El nombre solo puede contener letras y espacios. Por favor, verifica tu nombre.');
+            isSubmitting = false;
+            return false;
+        }
+        return true;
+    };
+
+    const validateApellidos = () => {
+        const apellidos = apellidoInput.value.trim();
+        if (!/^[a-zA-ZáéíóúÁÉÍÓÚñÑ ]+$/.test(apellidos)) {
+            showWarning('Los apellidos solo pueden contener letras y espacios. Por favor, verifica tus apellidos.');
+            isSubmitting = false;
+            return false;
+        }
+        return true;
+    };
+
+    const validateEditNombre = () => {
+        const nombre = editNombreInput.value.trim();
+        if (!/^[a-zA-ZáéíóúÁÉÍÓÚñÑ ]+$/.test(nombre)) {
+            showWarning('El nombre solo puede contener letras y espacios. Por favor, verifica tu nombre.');
+            isSubmitting = false;
+            return false;
+        }
+        return true;
+    };
+
+    const validateEditApellidos = () => {
+        const apellidos = editApellidoInput.value.trim();
+        if (!/^[a-zA-ZáéíóúÁÉÍÓÚñÑ ]+$/.test(apellidos)) {
+            showWarning('Los apellidos solo pueden contener letras y espacios. Por favor, verifica tus apellidos.');
+            isSubmitting = false;
+            return false;
+        }
+        return true;
+    };
+
+    const validarFormRegistro = () => {
+        return validateDNI() && validateNombre() && validateApellidos();
+    };
+
+    const validarFormEdicion = () => {
+        return validateEditNombre() && validateEditApellidos() && validateEditEdad() && validateEditNumGestacion();
+    };
+
+    const showWarning = (message) => {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Advertencia',
+            text: message,
+        });
+    };
+
+
     filtroEstado.addEventListener('change', filterRows);
     filtroFecha.addEventListener('input', filterRows);
     filtroDniNombre.addEventListener('input', filterRows);
@@ -66,81 +152,99 @@ document.addEventListener('DOMContentLoaded', function () {
     // Manejar el envío del formulario de agregar médico
     formPersonal.addEventListener('submit', function (e) {
         e.preventDefault();
-        const formData = new FormData(this);
-        fetch(this.action, {
-            method: 'POST',
-            body: formData,
-            headers: {
-                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-            }
-        })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    Swal.fire({
-                        title: "Guardado!",
-                        text: data.message,
-                        icon: "success",
-                    }).then(() => {
-                        $('#exampleModalM').modal('hide'); // Cierra el modal
-                        location.reload(); // Actualiza la página para reflejar los cambios
-                    });
-                } else {
-                    Swal.fire({
-                        title: "Error!",
-                        text: data.message,
-                        icon: "error",
-                    });
+        if (isSubmitting) return; // Evitar múltiples envíos
+        isSubmitting = true;
+        if (validarFormRegistro()) {
+            const formData = new FormData(this);
+            fetch(this.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
                 }
             })
-            .catch(error => {
-                console.error('Error:', error);
-                Swal.fire({
-                    title: "Error!",
-                    text: "Ocurrió un error al guardar el médico.",
-                    icon: "error",
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        Swal.fire({
+                            title: "Guardado!",
+                            text: data.message,
+                            icon: "success",
+                        }).then(() => {
+                            $('#exampleModalM').modal('hide');
+                            location.reload();
+                        });
+                    } else {
+                        Swal.fire({
+                            title: "Ocurrio un Error!",
+                            text: data.message,
+                            icon: "error",
+                        });
+                    }
+                    isSubmitting = false;
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    Swal.fire({
+                        title: "Ocurrio un Error!",
+                        text: "Ocurrió un error al guardar el médico. Intente nuevamente.",
+                        icon: "error",
+                    });
+                    isSubmitting = false;
                 });
-            });
+        } else {
+            isSubmitting = false;
+        }
+
     });
 
     // Manejar el envío del formulario de edición
     document.getElementById('form-Epersonal').addEventListener('submit', function (e) {
         e.preventDefault();
-        const formData = new FormData(this);
-        fetch(this.action, {
-            method: 'POST',
-            body: formData,
-            headers: {
-                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-            }
-        })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    Swal.fire({
-                        title: "Actualizado!",
-                        text: data.message,
-                        icon: "success",
-                    }).then(() => {
-                        $('#editModalM').modal('hide'); // Cierra el modal
-                        location.reload(); // Actualiza la página para reflejar los cambios
-                    });
-                } else {
-                    Swal.fire({
-                        title: "Error!",
-                        text: data.message,
-                        icon: "error",
-                    });
+        if (isSubmitting) return;
+        isSubmitting = true;
+
+        if (validarFormEdicion()) {
+            const formData = new FormData(this);
+            fetch(this.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
                 }
             })
-            .catch(error => {
-                console.error('Error:', error);
-                Swal.fire({
-                    title: "Error!",
-                    text: "Ocurrió un error al actualizar los datos.",
-                    icon: "error",
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        Swal.fire({
+                            title: "Actualizado!",
+                            text: data.message,
+                            icon: "success",
+                        }).then(() => {
+                            $('#editModalM').modal('hide'); // Cierra el modal
+                            location.reload(); // Actualiza la página para reflejar los cambios
+                        });
+                    } else {
+                        Swal.fire({
+                            title: "Error!",
+                            text: data.message,
+                            icon: "error",
+                        });
+                    }
+                    isSubmitting = false;
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    Swal.fire({
+                        title: "Error!",
+                        text: "Ocurrió un error al actualizar los datos.",
+                        icon: "error",
+                    });
+                    isSubmitting = false;
                 });
-            });
+        } else {
+            isSubmitting = false;
+        }
     });
 
     // Manejar la eliminación de médicos

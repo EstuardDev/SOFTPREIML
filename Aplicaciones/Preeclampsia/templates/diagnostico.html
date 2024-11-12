@@ -651,7 +651,6 @@
                 {% endif %}
             </thead>
             <tbody>
-                <!-- Aquí mostramos los datos de los emdicos -->
                 {% if request.user.is_superuser %}
                 {% for dg in diagnostico %}
                 <tr>
@@ -671,6 +670,7 @@
                         <span class="badge bg-danger">{{ dg.nivelriesgo }}</span>
                         {% endif %}
                     </td>
+                    <td>{{ dg.detalles }}</td>
                     <td>
                         {% if dg.estado == 'Evaluado' %}
                         <span class="badge bg-success">Evaluado</span>
@@ -702,12 +702,11 @@
                         </a>
 
                     </td>
-                    <!-- resto de los datos -->
                 </tr>
                 {% endfor %}
                 {% else %}
                 {% for dg in diagnostico %}
-                {% if dg.personal == user.personal %}
+                {% if dg.paciente.personal == user.personal %}
                 <tr>
                     <td>{{ forloop.counter }}</td>
                     <td style="text-align: left;">{{ dg.paciente }}</td>
@@ -724,6 +723,7 @@
                         <span class="badge bg-danger">{{ dg.nivelriesgo }}</span>
                         {% endif %}
                     </td>
+                    <td>{{ dg.detalles }}</td>
                     <td>
                         {% if dg.estado == 'Evaluado' %}
                         <span class="badge bg-success">Evaluado</span>
@@ -752,7 +752,6 @@
                         <a href="{% url 'eliminarDiagnostico' dg.id %}" class="btn btn-outline-danger btnEliminar">
                             <i class="fa-solid fa-prescription-bottle-medical"></i>
                         </a>
-
                     </td>
                 </tr>
                 {% endif %}

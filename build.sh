@@ -10,7 +10,10 @@ pip install -r requirements.txt
 # 2. Colectar archivos estáticos
 python manage.py collectstatic --no-input
 
-# 3. Ejecutar las migraciones
+# 3. Ejecutar las migraciones si hubo cambios en models
+python manage.py makemigrations
+
+# 3.1 Ejecutar la migracion total
 python manage.py migrate
 
 # 4. Crear grupos
@@ -32,9 +35,9 @@ from django.contrib.sessions.models import Session
 from django.contrib.auth.models import User, Group
 
 # Cambia estos valores a los que desees
-username = 'Estuardjr'
-password = 'dinhor80'
-email = 'kenestr80@gmail.com'  # Correo electrónico
+username = 'Admin'
+password = 'admin12345'
+email = 'admin@gmail.com'  # Correo electrónico
 
 # Crear o actualizar superusuario
 user, created = User.objects.get_or_create(username=username, defaults={'email': email})

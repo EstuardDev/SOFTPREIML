@@ -718,12 +718,11 @@
                 </tr>
             </thead>
             <tbody>
-                <!-- Aquí mostramos los datos del Historial Clinico -->
                 {% for hc in historial %}
+                {% if user.is_superuser or hc.paciente.personal == user.personal %}
                 <tr>
                     <td>{{ forloop.counter }}</td>
                     <td style="text-align: left;">{{ hc.paciente }}</td>
-                    <!-- <td>{{ hc.fechaconsulta|date:"d-m-Y" }}</td> -->
                     <td>{{ hc.edadgestacional }}</td>
                     <td>{{ hc.periodointergenesico }}</td>
                     <td>{{ hc.embarazonuevopareja }}</td>
@@ -752,8 +751,8 @@
                             <i class="fa-solid fa-prescription-bottle-medical"></i>
                         </a>
                     </td>
-                    <!-- resto de los datos -->
                 </tr>
+                {% endif %}
                 {% endfor %}
             </tbody>
         </table>

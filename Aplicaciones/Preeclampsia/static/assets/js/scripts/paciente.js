@@ -1,10 +1,5 @@
 document.addEventListener('DOMContentLoaded', function () {
 
-    $('#tablaMedico').DataTable({
-        lengthMenu: [5, 10, 15, 20],
-        pageLength: 5
-    });
-
     const formPaciente = document.getElementById('form-Paciente');
     const btnLimpiar = formPaciente.querySelector('.btnLimpiar');
     const btnEliminar = document.querySelectorAll(".btnEliminar");
@@ -12,10 +7,163 @@ document.addEventListener('DOMContentLoaded', function () {
     const btnActivar = document.querySelectorAll(".btnActivar");
     const filtroDniNombre = document.getElementById('filtroDni');
     const filtroEstado = document.getElementById('filtroEstado');
-    const filtroHistoriaC = document.getElementById('filtroHistoriaC'); // Nuevo filtro de fecha
+    const filtroHistoriaC = document.getElementById('filtroHistoriaC'); 
+
+    const dniInput = document.getElementById('txtdni');
+    const nombreInput = document.getElementById('txtnombre');
+    const apellidoInput = document.getElementById('txtapellido');
+    const edadInput = document.getElementById('txtedad');
+    const ngestacionInput = document.getElementById('txtnumgestacion');
+
+    const editNombreInput = document.getElementById('txteditnombre');
+    const editApellidoInput = document.getElementById('txteditapellido');
+    const editEdadInput = document.getElementById('txteditedad');
+    const editNgestacionInput = document.getElementById('txteditngestacion');
+
+    let isSubmitting = false;
+
+    const validateDNI = () => {
+        const dni = dniInput.value.trim();
+        if (dni.length !== 8) {
+            showWarning('El DNI debe tener 8 dígitos.');
+            isSubmitting = false;
+            return false;
+        }
+        if (!/^\d+$/.test(dni)) {
+            showWarning('Por favor, ingresa un DNI válido (solo números).');
+            isSubmitting = false;
+            return false;
+        }
+        if (/^(\d)\1+$/.test(dni)) { 
+            showWarning('El DNI no puede contener dígitos repetidos. Ingrese un DNI válido.');
+            isSubmitting = false;
+            return false;
+        }
+        return true;
+    };
+
+    const validateNombre = () => {
+        const nombre = nombreInput.value.trim();
+        if (!/^[a-zA-ZáéíóúÁÉÍÓÚñÑ ]+$/.test(nombre)) {
+            showWarning('El nombre solo puede contener letras y espacios. Por favor, verifica tu nombre.');
+            isSubmitting = false;
+            return false;
+        }
+        return true;
+    };
+
+    const validateApellidos = () => {
+        const apellidos = apellidoInput.value.trim();
+        if (!/^[a-zA-ZáéíóúÁÉÍÓÚñÑ ]+$/.test(apellidos)) {
+            showWarning('Los apellidos solo pueden contener letras y espacios. Por favor, verifica tus apellidos.');
+            isSubmitting = false;
+            return false;
+        }
+        return true;
+    };
+
+    const validateEdad = () => {
+        const edad = edadInput.value.trim();
+        if (!/^\d+$/.test(edad)) {
+            showWarning('La edad debe ser un número. Por favor, ingresa una edad válida.');
+            isSubmitting = false;
+            return false;
+        }
+        const edadNum = parseInt(edad, 10);
+        if (edadNum < 10 || edadNum > 100) {
+            showWarning('La edad debe estar entre 10 y 100 años.');
+            isSubmitting = false;
+            return false;
+        }
+        return true;
+    };
+
+    const validateNumGestacion = () => {
+        const ngestacion = ngestacionInput.value.trim();
+        if (!/^\d+$/.test(ngestacion)) {
+            showWarning('El número de gestaciones debe ser un número entero.');
+            isSubmitting = false;
+            return false;
+        }
+        const ngestacionNum = parseInt(ngestacion, 10);
+        if (ngestacionNum < 20) {
+            showWarning('El número de semanas de gestación no puede ser menor a 20.');
+            isSubmitting = false;
+            return false;
+        }
+        return true;
+    };
+
+    const validateEditNombre = () => {
+        const nombre = editNombreInput.value.trim();
+        if (!/^[a-zA-ZáéíóúÁÉÍÓÚñÑ ]+$/.test(nombre)) {
+            showWarning('El nombre solo puede contener letras y espacios. Por favor, verifica tu nombre.');
+            isSubmitting = false;
+            return false;
+        }
+        return true;
+    };
+
+    const validateEditApellidos = () => {
+        const apellidos = editApellidoInput.value.trim();
+        if (!/^[a-zA-ZáéíóúÁÉÍÓÚñÑ ]+$/.test(apellidos)) {
+            showWarning('Los apellidos solo pueden contener letras y espacios. Por favor, verifica tus apellidos.');
+            isSubmitting = false;
+            return false;
+        }
+        return true;
+    };
+
+    const validateEditEdad = () => {
+        const edad = editEdadInput.value.trim();
+        if (!/^\d+$/.test(edad)) {
+            showWarning('La edad debe ser un número. Por favor, ingresa una edad válida.');
+            isSubmitting = false;
+            return false;
+        }
+        const edadNum = parseInt(edad, 10);
+        if (edadNum < 10 || edadNum > 100) {
+            showWarning('La edad debe estar entre 10 y 100 años.');
+            isSubmitting = false;
+            return false;
+        }
+        return true;
+    };
+
+    const validateEditNumGestacion = () => {
+        const ngestacion = editNgestacionInput.value.trim();
+        if (!/^\d+$/.test(ngestacion)) {
+            showWarning('El número de gestaciones debe ser un número entero.');
+            isSubmitting = false;
+            return false;
+        }
+        const ngestacionNum = parseInt(ngestacion, 10);
+        if (ngestacionNum < 20) {
+            showWarning('El número de semanas de gestación no puede ser menor a 20.');
+            isSubmitting = false;
+            return false;
+        }
+        return true;
+    };
+
+    const showWarning = (message) => {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Advertencia',
+            text: message,
+        });
+    };
+
+    const validarFormRegistro = () => {
+        return validateDNI() && validateNombre() && validateApellidos() && validateEdad() && validateNumGestacion();
+    };
+
+    const validarFormEdicion = () => {
+        return validateEditNombre() && validateEditApellidos() && validateEditEdad() && validateEditNumGestacion();
+    };
 
     filtroEstado.addEventListener('change', filterRows);
-    filtroHistoriaC.addEventListener('input', filterRows); // Añadir listener para el nuevo filtro
+    filtroHistoriaC.addEventListener('input', filterRows); 
 
     let rows = []; // Almacenar todas las filas
 
@@ -66,42 +214,50 @@ document.addEventListener('DOMContentLoaded', function () {
     // Manejar el envío del formulario de agregar Paciente
     formPaciente.addEventListener('submit', function (e) {
         e.preventDefault();
+        if (isSubmitting) return;
+        isSubmitting = true;
 
-        const formData = new FormData(this);
-        fetch(this.action, {
-            method: 'POST',
-            body: formData,
-            headers: {
-                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-            }
-        })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    Swal.fire({
-                        title: "Guardado!",
-                        text: data.message,
-                        icon: "success",
-                    }).then(() => {
-                        $('#exampleModalP').modal('hide'); // Cierra el modal
-                        location.reload(); // Opcional: Actualiza la página para reflejar los cambios
-                    });
-                } else {
-                    Swal.fire({
-                        title: "Error!",
-                        text: data.message,
-                        icon: "error",
-                    });
+        if (validarFormRegistro()) {
+            const formData = new FormData(this);
+            fetch(this.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
                 }
             })
-            .catch(error => {
-                console.error('Error:', error);
-                Swal.fire({
-                    title: "Error!",
-                    text: "Ocurrió un error al guardar el médico.",
-                    icon: "error",
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        Swal.fire({
+                            title: "Guardado!",
+                            text: data.message,
+                            icon: "success",
+                        }).then(() => {
+                            $('#exampleModalP').modal('hide'); 
+                            location.reload();
+                        });
+                    } else {
+                        Swal.fire({
+                            title: "Error!",
+                            text: data.message,
+                            icon: "error",
+                        });
+                    }
+                    isSubmitting = false;
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    Swal.fire({
+                        title: "Error!",
+                        text: "Ocurrió un error al guardar el médico.",
+                        icon: "error",
+                    });
+                    isSubmitting = false;
                 });
-            });
+        } else {
+            isSubmitting = false; // Resetear la bandera si no pasa la validación
+        }
     });
 
     // Manejar la funcionalidad del botón Limpiar
@@ -113,41 +269,50 @@ document.addEventListener('DOMContentLoaded', function () {
     // Manejar el envío del formulario de edición
     document.getElementById('form-Epaciente').addEventListener('submit', function (e) {
         e.preventDefault();
-        const formData = new FormData(this);
-        fetch(this.action, {
-            method: 'POST',
-            body: formData,
-            headers: {
-                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-            }
-        })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    Swal.fire({
-                        title: "Actualizado!",
-                        text: data.message,
-                        icon: "success",
-                    }).then(() => {
-                        $('#editModalP').modal('hide'); // Cierra el modal
-                        location.reload(); // Opcional: Actualiza la página para reflejar los cambios
-                    });
-                } else {
-                    Swal.fire({
-                        title: "Error!",
-                        text: data.message,
-                        icon: "error",
-                    });
+        if (isSubmitting) return;
+        isSubmitting = true;
+
+        if (validarFormEdicion()) {
+            const formData = new FormData(this);
+            fetch(this.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
                 }
             })
-            .catch(error => {
-                console.error('Error:', error);
-                Swal.fire({
-                    title: "Error!",
-                    text: "Ocurrió un error al actualizar los datos.",
-                    icon: "error",
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        Swal.fire({
+                            title: "Actualizado!",
+                            text: data.message,
+                            icon: "success",
+                        }).then(() => {
+                            $('#editModalP').modal('hide'); // Cierra el modal
+                            location.reload(); // Opcional: Actualiza la página para reflejar los cambios
+                        });
+                    } else {
+                        Swal.fire({
+                            title: "Error!",
+                            text: data.message,
+                            icon: "error",
+                        });
+                    }
+                    isSubmitting = false;
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    Swal.fire({
+                        title: "Error!",
+                        text: "Ocurrió un error al actualizar los datos.",
+                        icon: "error",
+                    });
+                    isSubmitting = false;
                 });
-            });
+        } else {
+            isSubmitting = false;
+        }
     });
 
     // Manejar la eliminación de pacientes
@@ -217,13 +382,12 @@ document.addEventListener('DOMContentLoaded', function () {
                 .then(data => {
                     if (data.success) {
                         const historial = data.historialPac;
-                        const nombrePaciente = data.nombrePaciente; // Obtener el nombre del paciente
+                        const nombrePaciente = data.nombrePaciente;
                         const apellidoPaciente = data.apellidoPaciente;
                         const tbody = document.querySelector('#tablaVisualizarHpac tbody');
-                        tbody.innerHTML = ''; // Limpiar la tabla existente
+                        tbody.innerHTML = ''; 
     
                         if (historial.length > 0) {
-                            // Mostrar mensaje de bienvenida
                             const Toast = Swal.mixin({
                                 toast: true,
                                 position: 'bottom',
@@ -238,21 +402,13 @@ document.addEventListener('DOMContentLoaded', function () {
                             Toast.fire({
                                 icon: "success",
                                 title: "Historial cargado correctamente."
-                                /* title: `¡Bienvenido ${nombrePaciente} ${apellidoPaciente}!`,
-                                text: `Historial cargado correctamente.`,
-                                icon: 'success',
-                                confirmButtonText: 'Aceptar' */
                             }).then(() => {
-                                // Establecer el nombre del paciente en el modal
                                 document.querySelector('#nombre-paciente').textContent = `${nombrePaciente} ${apellidoPaciente}`;
     
-                                // Formatear las fechas y agregar los datos a la tabla
                                 historial.forEach((item, index) => {
-                                    // Asegurarse de que las fechas sean válidas
                                     const fechaConsulta = new Date(item.fechaconsulta);
                                     const fechaRegistro = new Date(item.fecharegistro);
     
-                                    // Comprobar si las fechas son válidas
                                     if (isNaN(fechaConsulta.getTime())) {
                                         console.error('Fecha de consulta inválida:', item.fechaconsulta);
                                     }
@@ -260,10 +416,8 @@ document.addEventListener('DOMContentLoaded', function () {
                                         console.error('Fecha de registro inválida:', item.fecharegistro);
                                     }
     
-                                    // Formatear la fecha de consulta (d-m-Y)
                                     const fechaConsultaFormateada = fechaConsulta.toISOString().split('T')[0].split('-').reverse().join('-');
     
-                                    // Formatear la fecha de registro (d-m-Y h:i A)
                                     const dia = fechaRegistro.getDate().toString().padStart(2, '0');
                                     const mes = (fechaRegistro.getMonth() + 1).toString().padStart(2, '0');
                                     const año = fechaRegistro.getFullYear();

@@ -46,7 +46,7 @@
                             {% else %}
                             <!-- Si el usuario es médico, muestra solo sus reportes -->
                             {% for r in reportes %}
-                            {% if r.personal == user.personal %}
+                            {% if r.paciente.personal == request.user.personal %}
                             <tr>
                                 <td>{{ forloop.counter }}</td>
                                 <td>{{ r.personal }}</td>
