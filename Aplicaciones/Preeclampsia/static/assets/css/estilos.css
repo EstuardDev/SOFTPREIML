@@ -34,6 +34,7 @@ input:-webkit-autofill {
   text-overflow: ellipsis;
   white-space: nowrap;
   overflow: hidden;
+  z-index: 0;
 }
 
 /* .input-group-text {

@@ -113,11 +113,6 @@
                                                 readonly>
                                             <label for="txtedadgestacional">Edad Gestacional</label>
                                         </div>
-                                        <!-- <div class="form-floating mb-3">
-                                            <input type="text" class="form-control" id="txtperiodointerg"
-                                                name="txtperiodointerg" placeholder="Periodo intergenésico">
-                                            <label for="txtperiodointerg">Periodo intergenésico</label>
-                                        </div> -->
                                         <div class="form-floating mb-3">
                                             <select class="form-select" id="txtperiodointerg" name="txtperiodointerg"
                                                 aria-label="Floating label select example">
@@ -125,8 +120,11 @@
                                                 <option>1</option>
                                                 <option>2</option>
                                                 <option>3</option>
+                                                <option>4</option>
+                                                <option>5</option>
+                                                <option>6</option>
                                             </select>
-                                            <label for="txtperiodointerg">Periodo intergenésico</label>
+                                            <label for="txtperiodointerg">Periodo intergenésico (Años)</label>
                                         </div>
                                         <div class="form-floating mb-3">
                                             <select class="form-select" id="txtembarazonuevapareja"
@@ -248,9 +246,11 @@
                                                 <select class="form-select" id="txttestdeass" name="txttestdeass"
                                                     aria-label="Floating label select example">
                                                     <option selected>Seleccione</option>
-                                                    <option>1</option>
-                                                    <option>2</option>
-                                                    <option>3</option>
+                                                    <option value="0">Negativo</option>
+                                                    <option value="0.5">Trazadas</option>
+                                                    <option value="1">1</option>
+                                                    <option value="2">2</option>
+                                                    <option value="3">3</option>
                                                 </select>
                                                 <label for="txttestdeass">Test de ASS (+)</label>
                                             </div>
@@ -286,7 +286,7 @@
                                                     placeholder="TGO">
                                                 <label for="txttgo">TGO</label>
                                             </div>
-                                            <span class="input-group-text">ml
+                                            <span class="input-group-text">U/L
                                             </span>
                                         </div>
                                     </div>
@@ -297,7 +297,7 @@
                                                     placeholder="TGP">
                                                 <label for="txttgp">TGP</label>
                                             </div>
-                                            <span class="input-group-text">ml
+                                            <span class="input-group-text">U/L
                                             </span>
                                         </div>
                                     </div>
@@ -321,7 +321,7 @@
                                                     placeholder="dni">
                                                 <label for="txturea">UREA</label>
                                             </div>
-                                            <span class="input-group-text">mmHg
+                                            <span class="input-group-text">mg/dL
                                             </span>
                                         </div>
                                     </div>
@@ -332,38 +332,12 @@
                                                     name="txtfibrinogeno" placeholder="dni">
                                                 <label for="txtfibrinogeno">Fibrinógeno</label>
                                             </div>
-                                            <span class="input-group-text">mmHg
+                                            <span class="input-group-text">mg/dL
                                             </span>
                                         </div>
                                     </div>
                                     <div class="col-md-4"></div>
                                 </div>
-                                <!-- <div class="row">
-                                    <div class="col-md-4">
-                                        <div class="input-group">
-                                            <div class="form-floating">
-                                                <input type="text" class="form-control" id="txttiempoprotrombina"
-                                                    name="txttiempoprotrombina" placeholder="dni">
-                                                <label for="txttiempoprotrombina">Tiempo de Protrombina</label>
-                                            </div>
-                                            <span class="input-group-text">Seg
-                                            </span>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <div class="input-group">
-                                            <div class="form-floating">
-                                                <input type="text" class="form-control" id="txtparcialtromboplastina"
-                                                    name="txtparcialtromboplastina" placeholder="dni">
-                                                <label for="txtparcialtromboplastina">Tiempo Parcial de
-                                                    Tromboplastina</label>
-                                            </div>
-                                            <span class="input-group-text">Seg
-                                            </span>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4"></div>
-                                </div> -->
                             </div>
                         </div>
 
@@ -549,8 +523,6 @@
                                         </div>
                                     </div>
                                     <div class="col-md-12">
-                                        <!-- <textarea class="col-12" name="textarea" id="textarea"></textarea> -->
-
                                         <div class="form-floating">
                                             <textarea class="form-control" id="txteditdetalles" name="txteditdetalles"
                                                 value="{{diagnostico.detalles}}" placeholder="Leave a comment here"
@@ -558,13 +530,6 @@
                                             </textarea>
                                             <label for="txteditdetalles">Detalles u Observación</label>
                                         </div>
-
-                                        <!-- <div class="form-floating mb-3">
-                                            <input type="text" class="form-control" id="txteditdetalles"
-                                                name="txteditdetalles" value="{{diagnostico.detalles}}"
-                                                placeholder="Ingresar Detalles">
-                                            <label for="txteditdetalles">Detalles u Observación</label>
-                                        </div> -->
                                     </div>
                                 </div>
 
