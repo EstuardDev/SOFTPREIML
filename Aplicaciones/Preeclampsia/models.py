@@ -33,7 +33,7 @@ def create_user(sender, instance, created, **kwargs):
         
 class Paciente(models.Model):
     id = models.BigAutoField(primary_key=True)
-    personal = models.ForeignKey(Personal, on_delete=models.CASCADE) 
+    personal = models.ForeignKey(Personal, on_delete=models.CASCADE, default=1) 
     dni = models.CharField(max_length=8, unique=True)  
     nombre = models.CharField(max_length=50)  
     apellidos = models.CharField(max_length=50)  

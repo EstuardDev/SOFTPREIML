@@ -151,7 +151,7 @@ document.addEventListener('DOMContentLoaded', function () {
         } else {
             Swal.fire({
                 title: 'Error!',
-                text: data.message.concat(' https://wa.me/ 935240562'),
+                text: data.message,
                 icon: 'error',
                 background: '#f8d7da',
                 confirmButtonColor: '#d33'
