@@ -11,10 +11,10 @@ pip install -r requirements.txt
 python manage.py collectstatic --no-input
 
 # 3. Ejecutar las migraciones si hubo cambios en models
-python manage.py makemigrations --no-input
+python manage.py makemigrations 
 
 # 3.1 Ejecutar la migracion total
-python manage.py migrate --no-input
+python manage.py migrate
 
 # 4. Crear grupos
 python -c "
