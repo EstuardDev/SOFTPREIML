@@ -62,7 +62,7 @@ class HistoriaClinica(models.Model):
     presiondiastolica1 = models.PositiveIntegerField()
     presionsistolica2 = models.PositiveIntegerField()  
     presiondiastolica2 = models.PositiveIntegerField()
-    testdeass = models.PositiveIntegerField()
+    testdeass = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
     proteinaorina = models.DecimalField(max_digits=7, decimal_places=2, null=True, blank=True)
     tgo = models.DecimalField(max_digits=7, decimal_places=2, null=True, blank=True)
     tgp = models.DecimalField(max_digits=7, decimal_places=2, null=True, blank=True)

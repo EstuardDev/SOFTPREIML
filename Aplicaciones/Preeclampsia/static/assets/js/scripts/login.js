@@ -137,7 +137,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const handleLoginResponse = (data) => {
         if (data.success) {
             Swal.fire({
-                title: 'Bienvenido a SoftPreI!',
+                title: 'Bienvenido a SOFT-PREI!',
                 text: data.message,
                 icon: 'success',
                 background: '#e9efff',
