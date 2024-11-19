@@ -11,7 +11,9 @@ pip install -r requirements.txt
 python manage.py collectstatic --no-input
 
 # 3. Ejecutar las migraciones si hubo cambios en models
-python manage.py migrate --fake  # Fake migrations to avoid conflicts
+python manage.py migrate --fake Preeclampsia  # Marca la migración como aplicada sin cambios
+
+# Luego, crea nuevas migraciones y aplícalas
 python manage.py makemigrations
 python manage.py migrate --no-input
 
