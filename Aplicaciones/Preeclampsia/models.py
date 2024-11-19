@@ -49,7 +49,7 @@ class Paciente(models.Model):
 class HistoriaClinica(models.Model):
     id = models.BigAutoField(primary_key=True)
     paciente = models.ForeignKey(Paciente, on_delete=models.CASCADE)  
-    horaregistro = models.TimeField()
+    horaregistro = models.TimeField(default=time(0, 0))
     fecharegistro = models.DateField()
     # Nuevos paramatros para el diagnostico
     edadgestacional = models.PositiveIntegerField(null=True, blank=True)
