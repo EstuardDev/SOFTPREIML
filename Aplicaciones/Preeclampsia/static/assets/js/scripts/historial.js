@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const paciente = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
 
             // Convertir fecha de la fila al formato yyyy-mm-dd para comparar
-            const fechaCelda = row.querySelector('td:nth-child(3)').textContent; // Asegúrate de que este sea el índice correcto para la fecha
+            const fechaCelda = row.querySelector('td:nth-child(20)').textContent; // Asegúrate de que este sea el índice correcto para la fecha
             const [day, month, year] = fechaCelda.split('-');
             const fechaCeldaFormatted = `${year}-${month}-${day}`;
 
@@ -205,21 +205,17 @@ document.addEventListener('DOMContentLoaded', function () {
                     if (data.success) {
 
                         // Formatear la fecha a m-d-y h:m PM/AM
-                        const fechaConsulta = new Date(data.historial.fechaConsulta);
-                        const mes = ('0' + (fechaConsulta.getMonth() + 1)).slice(-2);  // le damos dos dígitos para el mes
-                        const dia = ('0' + fechaConsulta.getDate()).slice(-2);  // le damos dos dígitos para el día
-                        const año = fechaConsulta.getFullYear();
+                        const fecharegistro = new Date(data.historial.fecharegistro);
+                        const horaregistro = new Date(`1970-01-01T${data.historial.horaregistro}`); // Asumimos que horaregistro es un string en formato "HH:MM:SS"
 
-                        // Obtener la hora en formato 12 horas
-                        let horas = fechaConsulta.getHours();
-                        const minutos = ('0' + fechaConsulta.getMinutes()).slice(-2);
-                        // const segundos = ('0' + fechaConsulta.getSeconds()).slice(-2);  // le admos dos dígitos para los segundos
-                        const ampm = horas >= 12 ? 'PM' : 'AM';  // determinamos si es AM o PM
-                        // Convertir la hora al formato 12/24 horas
-                        horas = horas % 24;
-                        horas = horas ? horas : 24;  // Si es 0, poner 12
-                        // Construir la fecha en formato m-d-y h:m PM/AM
-                        const fechaFormateada = `${dia}-${mes}-${año} ${horas}:${minutos} ${ampm}`;
+                        // Formatear la fecha a yyyy-mm-dd
+                        const fechaFormateada = fecharegistro.toISOString().split('T')[0]; // yyyy-mm-dd
+
+                        // Formatear la hora a hh:mm:ss
+                        // const horas = ('0' + horaregistro.getUTCHours()).slice(-2);
+                        // const minutos = ('0' + horaregistro.getUTCMinutes()).slice(-2);
+                        // const segundos = ('0' + horaregistro.getUTCSeconds()).slice(-2);
+                        const horaFormateada = horaregistro; // hh:mm:ss
 
                         // Rellena el formulario de edición con los datos obtenidos                        
                         document.querySelector('#txteditid').value = data.historial.id;
@@ -227,7 +223,8 @@ document.addEventListener('DOMContentLoaded', function () {
                         document.querySelector('#txteditnombre').value = data.historial.nombre;
                         document.querySelector('#txteditapellido').value = data.historial.apellidos;
                         document.querySelector('#txteditedad').value = data.historial.edad;
-                        // document.querySelector('#txteditfecha').value = fechaFormateada;
+                        document.querySelector('#txteditfecha').value = fechaFormateada;
+                        document.querySelector('#txtedithora').value = horaFormateada;
                         document.querySelector('#txteditedadgestacional').value = data.historial.edadgestacional;
                         document.querySelector('#txteditperiodointerg').value = data.historial.periodointergenesico;
                         document.querySelector('#txteditembarazonuevapareja').value = data.historial.embarazonuevopareja;
@@ -434,26 +431,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
     initializeTable(); // Inicializar la tabla al cargar la página
 
-    // OPCIONES  DE CONFIGURACIÓN PARA MOSTRAR EL BLOQUE 3
-    // Seleccionamos el card de Laboratorio
-    const cardLaboratorio = document.querySelector('.card.mb-2');
-    const selectTestDeAss = document.getElementById('txttestdeass');
-
-    // // Agrega un estilo inicial para ocultar el bloque3
-    // cardLaboratorio.style.display = 'none';
-
-    // // Agrega un evento de cambio al select
-    // selectTestDeAss.addEventListener('change', () => {
-    //     // Obtiene el valor seleccionado
-    //     const valorSeleccionado = selectTestDeAss.value;
-
-    //     // Muestra o oculta el bloque3 según la opción seleccionada
-    //     if (valorSeleccionado === '2' || valorSeleccionado === '3') {
-    //         cardLaboratorio.style.display = 'block';
-    //     } else {
-    //         cardLaboratorio.style.display = 'none';
-    //     }
-    // });
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+    tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl)
+    })
 
 });
 

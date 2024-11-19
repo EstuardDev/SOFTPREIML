@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const btnActivar = document.querySelectorAll(".btnActivar");
     const filtroDniNombre = document.getElementById('filtroDni');
     const filtroEstado = document.getElementById('filtroEstado');
-    const filtroHistoriaC = document.getElementById('filtroHistoriaC'); 
+    const filtroHistoriaC = document.getElementById('filtroHistoriaC');
 
     const dniInput = document.getElementById('txtdni');
     const nombreInput = document.getElementById('txtnombre');
@@ -34,7 +34,7 @@ document.addEventListener('DOMContentLoaded', function () {
             isSubmitting = false;
             return false;
         }
-        if (/^(\d)\1+$/.test(dni)) { 
+        if (/^(\d)\1+$/.test(dni)) {
             showWarning('El DNI no puede contener dígitos repetidos. Ingrese un DNI válido.');
             isSubmitting = false;
             return false;
@@ -163,7 +163,7 @@ document.addEventListener('DOMContentLoaded', function () {
     };
 
     filtroEstado.addEventListener('change', filterRows);
-    filtroHistoriaC.addEventListener('input', filterRows); 
+    filtroHistoriaC.addEventListener('input', filterRows);
 
     let rows = []; // Almacenar todas las filas
 
@@ -234,7 +234,7 @@ document.addEventListener('DOMContentLoaded', function () {
                             text: data.message,
                             icon: "success",
                         }).then(() => {
-                            $('#exampleModalP').modal('hide'); 
+                            $('#exampleModalP').modal('hide');
                             location.reload();
                         });
                     } else {
@@ -375,7 +375,7 @@ document.addEventListener('DOMContentLoaded', function () {
     document.querySelectorAll('.btnVisualizar').forEach(button => {
         button.addEventListener('click', function () {
             const pacienteId = this.getAttribute('data-id');
-    
+
             // Realizar una solicitud AJAX para obtener los datos del historial
             fetch(`/historialPaciente/${pacienteId}`)
                 .then(response => response.json())
@@ -385,8 +385,8 @@ document.addEventListener('DOMContentLoaded', function () {
                         const nombrePaciente = data.nombrePaciente;
                         const apellidoPaciente = data.apellidoPaciente;
                         const tbody = document.querySelector('#tablaVisualizarHpac tbody');
-                        tbody.innerHTML = ''; 
-    
+                        tbody.innerHTML = '';
+
                         if (historial.length > 0) {
                             const Toast = Swal.mixin({
                                 toast: true,
@@ -397,41 +397,29 @@ document.addEventListener('DOMContentLoaded', function () {
                                 didOpen: (toast) => {
                                     toast.onmouseenter = Swal.stopTimer;
                                     toast.onmouseleave = Swal.resumeTimer;
-                                }  
+                                }
                             });
                             Toast.fire({
                                 icon: "success",
                                 title: "Historial cargado correctamente."
                             }).then(() => {
                                 document.querySelector('#nombre-paciente').textContent = `${nombrePaciente} ${apellidoPaciente}`;
-    
+
                                 historial.forEach((item, index) => {
-                                    const fechaConsulta = new Date(item.fechaconsulta);
-                                    const fechaRegistro = new Date(item.fecharegistro);
-    
-                                    if (isNaN(fechaConsulta.getTime())) {
-                                        console.error('Fecha de consulta inválida:', item.fechaconsulta);
-                                    }
-                                    if (isNaN(fechaRegistro.getTime())) {
-                                        console.error('Fecha de registro inválida:', item.fecharegistro);
-                                    }
-    
-                                    const fechaConsultaFormateada = fechaConsulta.toISOString().split('T')[0].split('-').reverse().join('-');
-    
-                                    const dia = fechaRegistro.getDate().toString().padStart(2, '0');
-                                    const mes = (fechaRegistro.getMonth() + 1).toString().padStart(2, '0');
-                                    const año = fechaRegistro.getFullYear();
-                                    const horas = fechaRegistro.getHours();
-                                    const minutos = fechaRegistro.getMinutes().toString().padStart(2, '0');
-                                    const ampm = horas >= 12 ? 'PM' : 'AM';
-                                    const horas12 = horas % 24 || 24; // Convertir a formato 12/24 horas
-    
-                                    const fechaRegistroFormateada = `${dia}-${mes}-${año} ${horas12.toString().padStart(2, '0')}:${minutos} ${ampm}`;
-    
+                                    const fecharegistro = new Date(item.fecharegistro); // YYYY-MM-DD
+                                    const horaregistro = item.horaregistro; // HH:MM:SS
+
+                                    // Formatear la fecha (d-m-Y)
+                                    const fechaFormateada = fecharegistro.toISOString().split('T')[0]; // yyyy-mm-dd
+
+                                    // Formatear la hora (HH:MM:SS)
+                                    const horaRegistroFormateada = new Date(`1970-01-01T${horaregistro}`).toLocaleTimeString('es-ES', { hour12: false });
+
                                     const row = document.createElement('tr');
                                     row.innerHTML = `
                                         <td>${index + 1}</td>
-                                        <td>${fechaConsultaFormateada}</td>
+                                        <td>${fechaFormateada}</td>                                        
+                                        <td>${horaRegistroFormateada}</td>
                                         <td>${item.edadgestacional}</td>
                                         <td>${item.periodointergenesico}</td>
                                         <td>${item.embarazonuevopareja}</td>
@@ -449,11 +437,10 @@ document.addEventListener('DOMContentLoaded', function () {
                                         <td>${item.creatinina}</td>
                                         <td>${item.urea}</td>
                                         <td>${item.fibrinogeno}</td>
-                                        <td>${fechaRegistroFormateada}</td>
                                     `;
                                     tbody.appendChild(row);
                                 });
-    
+
                                 // Mostrar el modal
                                 $('#historialPacienteModal').modal('show');
                             });
@@ -467,7 +454,7 @@ document.addEventListener('DOMContentLoaded', function () {
                             }).then(() => {
                                 // Establecemos el nombre del paciente en el modal si no encontramos el historial
                                 document.querySelector('#nombre-paciente').textContent = `${nombrePaciente} ${apellidoPaciente}`;
-                            });                                
+                            });
                         }
                     } else {
                         // Manejar el error si no se encuentran datos
@@ -489,7 +476,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     });
                 });
         });
-    }); 
+    });
 
     // Manejar la edición de pacientes
     btnEditar.forEach((btn) => {

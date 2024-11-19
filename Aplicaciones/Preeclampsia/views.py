@@ -1,7 +1,7 @@
 import joblib
 import os
 from django.conf import settings
-from datetime import timedelta
+from datetime import timedelta, datetime
 from django.contrib.auth.models import User, Group
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, update_session_auth_hash
@@ -290,7 +290,7 @@ def verHistorialPaciente(request, id):
         paciente = Paciente.objects.get(id=id, personal=request.user.personal)  # Filtra por personal autenticado
         historialPac = HistoriaClinica.objects.filter(paciente=paciente).select_related('paciente')
         historial_list = list(historialPac.values(
-            'fechaconsulta', 'edadgestacional', 'periodointergenesico', 'embarazonuevopareja',
+            'fecharegistro', 'horaregistro', 'edadgestacional', 'periodointergenesico', 'embarazonuevopareja',
             'hipertensioncronica', 'pasistolicabasal', 'padiastolicabasal', 'presionsistolica1',
             'presiondiastolica1', 'presionsistolica2', 'presiondiastolica2', 'testdeass',
             'proteinaorina', 'tgo', 'tgp', 'creatinina', 'urea', 'fibrinogeno', 'fecharegistro'
@@ -462,15 +462,7 @@ def historialviews(request):
 
 def guardarHistorial(request):
     if request.method == 'POST':
-        dni = request.POST['txtdni']
-        """presionsistolica = request.POST['txtsistolica']
-        presiondiastolica = request.POST['txtdiastolica']
-        proteinaorina = request.POST['txtproteinuria']
-        historiafamiliar = request.POST['txthistorialf']
-        diabetesgest = request.POST['txtdiabetes']
-        imc = request.POST['txtimc']
-        testdeass = request.POST['txttestdeass']
-        creatinina = request.POST['txtcreatinina']"""        
+        dni = request.POST['txtdni']       
         edadgestacional = request.POST['txtedadgestacional']
         periodointergenesico = request.POST['txtperiodointerg']
         embarazonuevopareja = request.POST['txtembarazonuevapareja']
@@ -482,20 +474,25 @@ def guardarHistorial(request):
         presionsistolica2 = request.POST['txtsistolicaM2']
         presiondiastolica2 = request.POST['txtdiastolicaM2']
         testdeass = request.POST['txttestdeass']
-        proteinaorina = request.POST['txtproteinuria']
-        tgo = request.POST['txttgo']
-        tgp = request.POST['txttgp']
-        creatinina = request.POST['txtcreatinina']
-        urea = request.POST['txturea']
-        fibrinogeno =request.POST['txtfibrinogeno']
+        proteinaorina = float(request.POST.get('txtproteinuria', '0.0') or '0.0')
+        tgo = float(request.POST.get('txttgo', '0.0') or '0.0')
+        tgp = float(request.POST.get('txttgp', '0.0') or '0.0')
+        creatinina = float(request.POST.get('txtcreatinina', '0.0') or '0.0')
+        urea = float(request.POST.get('txturea', '0.0') or '0.0')
+        fibrinogeno = float(request.POST.get('txtfibrinogeno', '0.0') or '0.0')
         try:
             paciente = Paciente.objects.get(dni=dni)
-            HistoriaClinica.objects.create(paciente=paciente, edadgestacional=edadgestacional, periodointergenesico=periodointergenesico,
+            # Obtener la fecha actual
+            fecha_actual = datetime.now().date()  # Solo la fecha
+            # Obtener la hora actual (si deseas establecerla manualmente)
+            hora_actual = datetime.now().time()  # Solo la hora
+            HistoriaClinica.objects.create(paciente=paciente,horaregistro=hora_actual, fecharegistro=fecha_actual, edadgestacional=edadgestacional, periodointergenesico=periodointergenesico,
                                            embarazonuevopareja=embarazonuevopareja, hipertensioncronica=hipertensioncronica, 
                                            pasistolicabasal=pasistolicabasal, padiastolicabasal=padiastolicabasal, presionsistolica1=presionsistolica1, 
                                         presiondiastolica1=presiondiastolica1, presionsistolica2=presionsistolica2, presiondiastolica2=presiondiastolica2, 
                                            testdeass=testdeass, proteinaorina=proteinaorina, tgo=tgo, tgp=tgp, creatinina=creatinina, 
                                            urea=urea,fibrinogeno=fibrinogeno)
+            
             return JsonResponse({"success": True, "message": "Historial registrado correctamente."})
         except Paciente.DoesNotExist:
             return JsonResponse({"success": False, "message": "Paciente no encontrado."})
@@ -512,7 +509,8 @@ def edicionHistorial(request, id):
                 "nombre": historial.paciente.nombre,
                 "apellidos": historial.paciente.apellidos,
                 "edad": historial.paciente.edad,
-                "fechaconsulta": historial.fechaconsulta,
+                "fecharegistro": historial.fecharegistro,
+                "horaregistro": historial.horaregistro,
                 "edadgestacional": historial.edadgestacional,
                 "periodointergenesico": historial.periodointergenesico,
                 "embarazonuevopareja": historial.embarazonuevopareja,
@@ -543,7 +541,9 @@ def editarHistorial(request):
     if request.method == "POST":
         id = request.POST.get('txteditid')
         dni = request.POST.get('txteditdni')
-        edad =request.POST.get('txteditedad')
+        edad = request.POST.get('txteditedad')
+        horaregistro = request.POST.get('txteditfecha')
+        fecharegistro = request.POST.get('txtedithora')
         edadgestacional = request.POST.get('txteditedadgestacional')
         periodointergenesico = request.POST.get('txteditperiodointerg')
         embarazonuevopareja = request.POST.get('txteditembarazonuevapareja')
@@ -565,6 +565,8 @@ def editarHistorial(request):
             paciente = Paciente.objects.get(dni=dni)
             historialc = HistoriaClinica.objects.get(id=id, paciente=paciente)
             historialc.paciente = paciente
+            historialc.fecharegistro = fecharegistro
+            historialc.horaregistro = horaregistro
             historialc.edadgestacional = edadgestacional
             historialc.periodointergenesico = periodointergenesico
             historialc.embarazonuevopareja = embarazonuevopareja
@@ -601,11 +603,10 @@ def editarHistorial(request):
                 "message": "Historial Clínico no encontrado."
             })
 
-        except Exception as e:
-            print(e),
+        except Exception:
             return JsonResponse({
                 "success": False,
-                "message": "Error al actualizar el historial." + str(e),
+                "message": "Error al actualizar el historial.",
             })
 
     return JsonResponse({
@@ -638,11 +639,13 @@ def diagnosticoviews(request):
 def guardarDiagnostico(request):
     if request.method == 'POST':
         try:
-            modelo_path = os.path.join(settings.STATICFILES_DIRS[0], 'assets', 'modelo', 'modelo_final_optimizacionV3.pkl')
-            scaler_path = os.path.join(settings.STATICFILES_DIRS[0], 'assets', 'modelo', 'scaler_optimizacionV3.pkl')
+            modelo_path = os.path.join(settings.STATICFILES_DIRS[0], 'assets', 'modelo', 'modelo_gradient_boosting.pkl')
+            scaler_path = os.path.join(settings.STATICFILES_DIRS[0], 'assets', 'modelo', 'scaler_gradient_boosting.pkl')
+            label_encoder_path = os.path.join(settings.STATICFILES_DIRS[0], 'assets', 'modelo', 'label_encoder_gradient_boosting.pkl')
             
             modelo = joblib.load(modelo_path)
             scaler = joblib.load(scaler_path)
+            label_encoder = joblib.load(label_encoder_path)
             
             dni = request.POST.get('txtdni')
             request.POST.get('txtnombre')
@@ -660,6 +663,7 @@ def guardarDiagnostico(request):
             presion_diastolica2 = float(request.POST.get('txtdiastolicaM2', '0') or '0')
             test_de_as = 1 if request.POST.get('txttestdeass') == 'SI' else 0
             proteina_orina = float(request.POST.get('txtproteinuria', '0') or '0')
+            proteinuria_g = proteina_orina / 1000
             tgo = float(request.POST.get('txttgo', '0') or '0')
             tgp = float(request.POST.get('txttgp', '0') or '0')
             creatinina = float(request.POST.get('txtcreatinina', '0') or '0')
@@ -669,35 +673,46 @@ def guardarDiagnostico(request):
             datos = [[                
                 edad_gestacional, periodo_intergenesico, embarazo_nueva_pareja, hipertension_cronica, pa_sistolica_basal,
                 pa_diastolica_basal, presion_sistolica1, presion_diastolica1, presion_sistolica2, presion_diastolica2,
-                test_de_as, proteina_orina, tgo, tgp, creatinina, urea, fibrinogeno
+                test_de_as, proteinuria_g, tgo, tgp, creatinina, urea, fibrinogeno
             ]]
             
             datos_scaled = scaler.transform(datos)
-            riesgo = modelo.predict(datos_scaled)[0]
-            
-            print(f"Valor de riesgo devuelto por el modelo: {riesgo}")
+            riesgo_codificado = modelo.predict(datos_scaled)[0]
+            riesgo = label_encoder.inverse_transform([riesgo_codificado])[0]
             
             pam1 = (presion_sistolica1 + 2 * presion_diastolica1) / 3
             pam2 = (presion_sistolica2 + 2 * presion_diastolica2) / 3
             pam_promedio = (pam1 + pam2) / 2
 
-            if riesgo == 0:
+            if riesgo == 0: #"No Preeclampsia"
+                nivel_riesgo = "No Preeclampsia"
+                riesgo_decimal = pam_promedio
+            elif riesgo == 1: #"Preeclampsia"
+                nivel_riesgo = "Preeclampsia"
+                riesgo_decimal = pam_promedio
+            elif riesgo == 2: #"Leve"
                 nivel_riesgo = "Leve"
                 riesgo_decimal = pam_promedio
-            elif riesgo == 1:
-                nivel_riesgo = "Severa"
+            elif riesgo == 3: #"Severa"
+                nivel_riesgo = "Leve"
                 riesgo_decimal = pam_promedio
             else:
-                raise ValueError(f"El valor de riesgo devuelto por el modelo no es válido: {riesgo}")
+                raise ValueError(f"El valor de riesgo devuelto por el modelo no es válido: {riesgo_codificado}")
+            
+            fecha_actual = datetime.now().date()
+            hora_actual = datetime.now().time()
             
             paciente = Paciente.objects.get(dni=dni)  # Asegúrate de que el paciente existe
             historiaclinica = HistoriaClinica.objects.filter(paciente=paciente).latest('fechaconsulta')
             diagnostico = Diagnostico(
                 paciente=paciente,
                 personal=request.user.personal, 
-                historia_clinica = historiaclinica,
+                historia_clinica=historiaclinica,
+                hora_prediccion=hora_actual,
+                fecha_prediccion=fecha_actual,
                 riesgo=riesgo_decimal,
                 nivelriesgo=nivel_riesgo,
+                detalles="Sin observaciones",
                 estado="Evaluado"
             )
             diagnostico.save()
@@ -711,10 +726,10 @@ def guardarDiagnostico(request):
                 'success': False,
                 'message': 'Paciente no encontrado.'
             })
-        except ValueError as e:
+        except ValueError:
             return JsonResponse({
                 'success': False,
-                'message': f'Error en los datos proporcionados: {e}'
+                'message': 'Error en los datos proporcionados.'
             })
         except Exception as e:
             print(f"Error: {e}")
@@ -755,7 +770,7 @@ def verHistorialDiagnostico(request, id):
 def buscarHistorial(request, dni):
     try:
         paciente = Paciente.objects.get(dni=dni)
-        historial = HistoriaClinica.objects.filter(paciente=paciente).latest('fechaconsulta')
+        historial = HistoriaClinica.objects.filter(paciente=paciente).latest('fecharegistro')
         data = {
             "success": True,
             "paciente": {
@@ -803,6 +818,7 @@ def edicionDiagnostico(request, id):
                 "paciente": f"{diagnostico.paciente.nombre} {diagnostico.paciente.apellidos}",
                 "personal": f"{diagnostico.personal.nombre} {diagnostico.personal.apellidos}",
                 "fecha_prediccion": diagnostico.fecha_prediccion,              
+                "hora_prediccion": diagnostico.hora_prediccion,               
                 "riesgo": diagnostico.riesgo,              
                 "nivelriesgo": diagnostico.nivelriesgo,              
                 "estado": diagnostico.estado,              
@@ -821,6 +837,8 @@ def editarDiagnostico(request):
         id = request.POST.get('txteditid')
         nompaciente = request.POST.get('txteditnombrespaciente')
         nommedico = request.POST.get('txteditnombresmedico')
+        fecha_prediccion = request.POST.get('txteditfechadiagnostico')
+        hora_prediccion = request.POST.get('txtedithoradiagnostico')
         riesgo = request.POST.get('txteditriesgo')
         nivelriesgo = request.POST.get('txteditnivelriesgo')
         estado = request.POST.get('txteditestado')
@@ -829,6 +847,8 @@ def editarDiagnostico(request):
             diagnostico = Diagnostico.objects.get(id=id)
             diagnostico.paciente.nombre = nompaciente
             diagnostico.personal.nombre = nommedico
+            diagnostico.fecha_prediccion = fecha_prediccion
+            diagnostico.hora_prediccion = hora_prediccion
             diagnostico.riesgo = riesgo
             diagnostico.nivelriesgo = nivelriesgo
             diagnostico.estado = estado
@@ -907,12 +927,26 @@ def calcular_indicadores(request):
 # 1. Cálculo del Tiempo Promedio de Detección por paciente(TPD)
 def calcular_tiempo_deteccion(diagnostico):
     try:
-        tiempo_final = diagnostico.fecha_prediccion
+        # Obtener la hora de predicción del diagnóstico
+        tiempo_final = diagnostico.hora_prediccion
+        # Obtener el historial clínico relacionado con el diagnóstico
         historial = diagnostico.historia_clinica
-        tiempo_inicio = historial.fecharegistro
+        # Obtener la hora de registro del historial
+        tiempo_inicio = historial.horaregistro
 
         if tiempo_final and tiempo_inicio:
-            tiempo_deteccion = tiempo_final - tiempo_inicio
+            # Combinar la fecha actual con las horas para calcular la diferencia
+            ahora = datetime.now()
+            tiempo_final_completo = datetime.combine(ahora.date(), tiempo_final)
+            tiempo_inicio_completo = datetime.combine(ahora.date(), tiempo_inicio)
+
+            # Calcular la diferencia de tiempo
+            tiempo_deteccion = tiempo_final_completo - tiempo_inicio_completo
+            
+            # Asegurarse de que la diferencia no sea negativa
+            if tiempo_deteccion < timedelta(0):
+                return "00:00:00"
+
             dias = tiempo_deteccion.days
             horas, resto = divmod(tiempo_deteccion.seconds, 3600)
             minutos, segundos = divmod(resto, 60)
@@ -930,35 +964,42 @@ def calcular_tiempo_deteccion(diagnostico):
 
 # Cálculo del Tiempo Promedio de Detección nivel general(TPD)
 def calcular_tiempo_promedio_deteccion():
-    pacientes_ids = Diagnostico.objects.values_list('paciente', flat=True).distinct()
-    
-    total_tiempo_deteccion = timedelta(0) 
-    total_pacientes = 0      
-
-    for paciente_id in pacientes_ids:
-        primer_diagnostico = Diagnostico.objects.filter(paciente_id=paciente_id).order_by('fecha_prediccion').first()
+    try:
+        # Obtener las fechas de inicio y fin de los diagnósticos
+        diagnosticos = Diagnostico.objects.all()
+        if not diagnosticos.exists():
+            return {"TPD_formateado": "0d 00h 00m 00s", "TPD_segundos": 0}
         
-        ultimo_diagnostico = Diagnostico.objects.filter(paciente_id=paciente_id).order_by('fecha_prediccion').last()
+        fecha_inicio = diagnosticos.earliest('historia_clinica__horaregistro').historia_clinica.horaregistro
+        fecha_fin = diagnosticos.latest('fecha_prediccion').fecha_prediccion
+
+        # Calcular la diferencia de tiempo en segundos
+        tiempo_total_segundos = (fecha_fin - fecha_inicio).total_seconds()
         
-        if primer_diagnostico and ultimo_diagnostico:
-            tiempo_deteccion = ultimo_diagnostico.fecha_prediccion - primer_diagnostico.historia_clinica.fecharegistro
-            total_tiempo_deteccion += tiempo_deteccion  
-            total_pacientes += 1  
+        # Obtener el total de pacientes únicos
+        total_pacientes = diagnosticos.values('paciente').distinct().count()
+        
+        if total_pacientes == 0:
+            return {"TPD_formateado": "0d 00h 00m 00s", "TPD_segundos": 0}
+        
+        # Calcular el tiempo promedio en segundos
+        tiempo_promedio_segundos = tiempo_total_segundos / total_pacientes
 
-    if total_pacientes > 0:
+        # Convertir segundos a días, horas, minutos, segundos
+        tiempo_promedio = timedelta(seconds=tiempo_promedio_segundos)
+        dias = tiempo_promedio.days
+        horas, resto = divmod(tiempo_promedio.seconds, 3600)
+        minutos, segundos = divmod(resto, 60)
 
-        tiempo_promedio_deteccion = total_tiempo_deteccion / total_pacientes
-    else:
-        tiempo_promedio_deteccion = timedelta(0)  # Si no hay pacientes, el promedio es 0
-
-    dias = tiempo_promedio_deteccion.days
-    horas, resto = divmod(tiempo_promedio_deteccion.seconds, 3600)
-    minutos, segundos = divmod(resto, 60)
-
-    return {
-        "TPD_formateado": f"{dias}d {horas:02}h {minutos:02}m {segundos:02}s",
-        "TPD_segundos": tiempo_promedio_deteccion.total_seconds()
-    }
+        # Formatear el tiempo
+        tiempo_formateado = f"{dias}d {horas:02}h {minutos:02}m {segundos:02}s"
+        
+        return {
+            "TPD_formateado": tiempo_formateado,
+            "TPD_segundos": round(tiempo_promedio_segundos)
+        }
+    except Exception:
+        return {"TPD_formateado": "0d 00h 00m 00s", "TPD_segundos": 0}
 
 # 2. Cálculo de la Proporción de Riesgo (PR)
 def calcular_proporcion_riesgo():

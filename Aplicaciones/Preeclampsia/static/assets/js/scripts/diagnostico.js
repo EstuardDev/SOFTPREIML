@@ -34,9 +34,13 @@ document.addEventListener('DOMContentLoaded', function () {
                 estado = 'leve';
             } else if (estadoBadge.classList.contains('bg-danger')) {
                 estado = 'severa';
+            } else if (estadoBadge.classList.contains('bg-success')) {
+                estado = 'no preeclampsia';
+            } else if (estadoBadge.classList.contains('bg-info')) {
+                estado = 'preeclampsia';
             }
 
-            const estadoMatch = estadoFilterValue === 'leve' ? estado === 'leve' : estadoFilterValue === 'severa' ? estado === 'severa' : true;
+            const estadoMatch = estadoFilterValue === 'no preeclampsia' ? estado === 'no preeclampsia' : estadoFilterValue === 'preeclampsia' ? estado === 'preeclampsia' : estadoFilterValue === 'leve' ? estado === 'leve' : estadoFilterValue === 'severa' ? estado === 'severa' : true;
 
             // Convertimos nuestar fecha de la fila al formato yyyy-mm-dd para comparar
             const fechaCelda = row.querySelector('td:nth-child(4)').textContent;
@@ -208,26 +212,15 @@ document.addEventListener('DOMContentLoaded', function () {
                                     // Asegurarse de que las fechas sean válidas
                                     const fechaPrediccion = new Date(item.fecha_prediccion);
 
-                                    // Comprobar si las fechas son válidas                                    
-                                    if (isNaN(fechaPrediccion.getTime())) {
-                                        console.error('Fecha de registro inválida:', item.fechaPrediccion);
-                                    }
-
-                                    // Formatear la fecha de registro (d-m-Y h:i A)
-                                    const dia = fechaPrediccion.getDate().toString().padStart(2, '0');
-                                    const mes = (fechaPrediccion.getMonth() + 1).toString().padStart(2, '0');
+                                    const dia = ('0' + fechaPrediccion.getDate()).slice(-2);  // Aseguramos dos dígitos para el día
+                                    const mes = ('0' + (fechaPrediccion.getMonth() + 1)).slice(-2);  // Aseguramos dos dígitos para el mes
                                     const año = fechaPrediccion.getFullYear();
-                                    const horas = fechaPrediccion.getHours();
-                                    const minutos = fechaPrediccion.getMinutes().toString().padStart(2, '0');
-                                    const ampm = horas >= 12 ? 'PM' : 'AM';
-                                    const horas12 = horas % 24 || 24; // Convertir a formato 12/24 horas
-
-                                    const fechaPrediccionFormateada = `${dia}-${mes}-${año} ${horas12.toString().padStart(2, '0')}:${minutos} ${ampm}`;
+                                    const fechaFormateada = `${año}-${mes}-${dia}`;
 
                                     const row = document.createElement('tr');
                                     row.innerHTML = `
                                         <td>${index + 1}</td>
-                                        <td>${fechaPrediccionFormateada}</td>
+                                        <td>${fechaFormateada}</td>
                                         <td>${item.riesgo}</td>
                                         <td>${nivelRiesgoBadge(item.nivelriesgo)}</td>
                                         <td>${estadoBadge(item.estado)}</td>
@@ -341,25 +334,23 @@ document.addEventListener('DOMContentLoaded', function () {
 
                         // Formatear la fecha a m-d-y h:m PM/AM
                         const fechaPrediccion = new Date(data.diagnostico.fecha_prediccion);
-                        const mes = ('0' + (fechaPrediccion.getMonth() + 1)).slice(-2);  // Aseguramos dos dígitos para el mes
-                        const dia = ('0' + fechaPrediccion.getDate()).slice(-2);  // Aseguramos dos dígitos para el día
-                        const año = fechaPrediccion.getFullYear();
+                        const horaPrediccion = data.diagnostico.hora_prediccion; // Asumiendo que esto viene en formato HH:MM:SS
 
-                        // Obtener la hora en formato 12 horas
-                        let horas = fechaPrediccion.getHours();
-                        const minutos = ('0' + fechaPrediccion.getMinutes()).slice(-2);
-                        // const segundos = ('0' + fechaPrediccion.getSeconds()).slice(-2);  // Aseguramos dos dígitos para los segundos
-                        const ampm = horas >= 12 ? 'PM' : 'AM';  // Determinar si es AM o PM
-                        // Convertir la hora al formato 12 horas
-                        horas = horas % 24;
-                        horas = horas ? horas : 24;  // Si es 0, poner 12
-                        // Construir la fecha en formato m-d-y h:m PM/AM
-                        const fechaFormateada = `${dia}-${mes}-${año} ${horas}:${minutos} ${ampm}`;
+                        // Formatear la fecha a d-m-y
+                        const dia = ('0' + fechaPrediccion.getDate()).slice(-2);  // Aseguramos dos dígitos para el día
+                        const mes = ('0' + (fechaPrediccion.getMonth() + 1)).slice(-2);  // Aseguramos dos dígitos para el mes
+                        const año = fechaPrediccion.getFullYear();
+                        const fechaFormateada = `${año}-${mes}-${dia}`; // Formato yyyy-mm-dd para un campo de tipo date
+
+                        // Asumir que horaPrediccion está en formato HH:MM:SS
+                        const [horas, minutos] = horaPrediccion.split(':');
+                        const horaFormateada = `${horas}:${minutos}`;
 
                         document.querySelector('#txteditid').value = data.diagnostico.id;
                         document.querySelector('#txteditnombrespaciente').value = data.diagnostico.paciente;
                         document.querySelector('#txteditnombresmedico').value = data.diagnostico.personal;
                         document.querySelector('#txteditfechadiagnostico').value = fechaFormateada;
+                        document.querySelector('#txtedithoradiagnostico').value = horaFormateada;
                         document.querySelector('#txteditriesgo').value = data.diagnostico.riesgo;
                         document.querySelector('#txteditnivelriesgo').value = data.diagnostico.nivelriesgo;
                         document.querySelector('#txteditestado').value = data.diagnostico.estado;

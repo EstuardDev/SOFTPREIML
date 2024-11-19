@@ -93,20 +93,17 @@
                                                 readonly>
                                             <label for="txtedadgestacional">Edad Gestacional</label>
                                         </div>
-                                        <!-- <div class="form-floating mb-3">
-                                            <input type="text" class="form-control" id="txtperiodointerg"
-                                                name="txtperiodointerg" placeholder="Periodo intergenésico">
-                                            <label for="txtperiodointerg">Periodo intergenésico</label>
-                                        </div> -->
                                         <div class="form-floating mb-3">
-                                            <select class="form-select" id="txtperiodointerg" name="txtperiodointerg" aria-label="floating label select example">
-                                                <option selected>Seleccione</option>
-                                                <option>1</option>
-                                                <option>2</option>
-                                                <option>3</option>
-                                                <option>4</option>
-                                                <option>5</option>
-                                                <option>6</option>
+                                            <select class="form-select" id="txtperiodointerg" name="txtperiodointerg"
+                                                aria-label="floating label select example" required>
+                                                <option selected disabled>Seleccione</option>
+                                                <option value="0">Primigesta (Gestante Primeriza)</option>
+                                                <option value="1">1 Año</option>
+                                                <option value="2">2 Años</option>
+                                                <option value="3">3 Años</option>
+                                                <option value="4">4 Años</option>
+                                                <option value="5">5 Años</option>
+                                                <option value="6">>6 Años</option>
                                             </select>
                                             <label for="txtperiodointerg">Periodo Intergenésico</label>
                                         </div>
@@ -248,7 +245,9 @@
                                                         name="txtproteinuria" placeholder="dni">
                                                     <label for="txtproteinuria">Proteina en Orina - 24 horas </label>
                                                 </div>
-                                                <span class="input-group-text">mg/dL
+                                                <span class="input-group-text">mg/24h
+                                                    <i class="fa-solid fa-circle-question p-2" data-bs-toggle="tooltip" data-bs-placement="top" 
+                                                    data-bs-title="Valores validos para el diagnóstico: 150 o 0.15"></i>
                                                 </span>
                                             </div>
                                         </div>
@@ -262,6 +261,9 @@
                         <div class="card mb-2">
                             <div class="card-header">
                                 <h3>Laboratorio</h3>
+                                <div class="alert alert-primary" role="alert">
+                                    <strong>Nota:</strong> Para evaluar el riesgo de preeclampsia, no es necesario ingresar todos los valores de laboratorio. Sin embargo, para determinar la severidad del riesgo, se requieren todos los datos clínicos y de laboratorio.
+                                </div>
                             </div>
                             <div class="bloque3">
                                 <div class="row">
@@ -368,6 +370,11 @@
                                     </div>
                                     <div class="col-md-6">
                                         <div class="form-floating mb-3">
+                                            <input type="date" class="form-control" id="txteditfecha" name="txteditfecha" 
+                                            value="{{historial.fecharegistro}}" placeholder="Fecha" required>
+                                            <label for="txteditfecha">Fecha</label>
+                                        </div>
+                                        <div class="form-floating mb-3">
                                             <input type="text" class="form-control" id="txteditdni" name="txteditdni"
                                                 value="{{historial.dni}}" placeholder="Ingresar DNI" readonly />
                                             <label for="txteditdni">Ingresar DNI</label>
@@ -391,15 +398,28 @@
                                     </div>
                                     <div class="col-md-6">
                                         <div class="form-floating mb-3">
+                                            <input type="time" class="form-control" id="txtedithora" name="txtedithora"
+                                                value="{{historial.horaregistro}}" placeholder="Hora" required>
+                                            <label for="txtedithora">Hora</label>
+                                        </div>
+                                        <div class="form-floating mb-3">
                                             <input type="text" class="form-control" id="txteditedadgestacional" name="txteditedadgestacional"
                                                 value="{{historial.edadgestacional}}" placeholder="Ingresar Edad Gestacional" readonly>
                                             <label for="txteditedadgestacional">Edad Gestacional</label>
                                         </div>
                                         <div class="form-floating mb-3">
-                                            <input type="text" class="form-control" id="txteditperiodointerg"
-                                                name="txteditperiodointerg" value="{{historial.periodointergenesico}}"
-                                                placeholder="Periodo intergenésico">
-                                            <label for="txteditperiodointerg">Periodo intergenésico</label>
+                                            <select class="form-select" id="txteditperiodointerg" name="txteditperiodointerg"
+                                                aria-label="floating label select example" required>
+                                                <option selected disabled>Seleccione</option>
+                                                <option value="0">Primigesta (Gestante Primeriza)</option>
+                                                <option value="1">1 Año</option>
+                                                <option value="2">2 Años</option>
+                                                <option value="3">3 Años</option>
+                                                <option value="4">4 Años</option>
+                                                <option value="5">5 Años</option>
+                                                <option value="6">>6 Años</option>
+                                            </select>
+                                            <label for="txtperiodointerg">Periodo Intergenésico</label>
                                         </div>
                                         <div class="form-floating mb-3">
                                             <select class="form-select" id="txteditembarazonuevapareja"
@@ -521,6 +541,8 @@
                                                 <select class="form-select" id="txtedittestdeass" name="txtedittestdeass"
                                                     aria-label="Floating label select example">
                                                     <option selected>Seleccione</option>
+                                                    <option value="0">Negativo</option>
+                                                    <option value="0.5">Trazadas</option>
                                                     <option value="1">1</option>
                                                     <option value="2">2</option>
                                                     <option value="3">3</option>
@@ -537,7 +559,7 @@
                                                     <label for="txteditproteinuria">Proteina en Orina - 24 horas
                                                     </label>
                                                 </div>
-                                                <span class="input-group-text">mg/dL
+                                                <span class="input-group-text">g/24h
                                                 </span>
                                             </div>
                                         </div>
@@ -560,7 +582,7 @@
                                                     value="{{historial.tgo}}" placeholder="tgo">
                                                 <label for="txtedittgo">TGO</label>
                                             </div>
-                                            <span class="input-group-text">ml
+                                            <span class="input-group-text">U/L
                                             </span>
                                         </div>
                                     </div>
@@ -571,7 +593,7 @@
                                                     value="{{historial.tgp}}" placeholder="tgp">
                                                 <label for="txtedittgp">TGP</label>
                                             </div>
-                                            <span class="input-group-text">ml
+                                            <span class="input-group-text">U/L
                                             </span>
                                         </div>
                                     </div>
@@ -596,7 +618,7 @@
                                                     value="{{historial.urea}}" placeholder="dni">
                                                 <label for="txtediturea">UREA</label>
                                             </div>
-                                            <span class="input-group-text">mmHg
+                                            <span class="input-group-text">mg/dL
                                             </span>
                                         </div>
                                     </div>
@@ -608,40 +630,12 @@
                                                     placeholder="dni">
                                                 <label id="txteditfibrinogeno" for="txtfibrinogeno">Fibrinógeno</label>
                                             </div>
-                                            <span class="input-group-text">mmHg
+                                            <span class="input-group-text">mg/dL
                                             </span>
                                         </div>
                                     </div>
                                     <div class="col-md-4"></div>
-                                </div>
-                                <!-- <div class="row">
-                                    <div class="col-md-4">
-                                        <div class="input-group">
-                                            <div class="form-floating">
-                                                <input type="text" class="form-control" id="txtedittiempoprotrombina"
-                                                    name="txttiempoprotrombina" placeholder="dni" minlength="8"
-                                                    maxlength="8">
-                                                <label for="txtedittiempoprotrombina">Tiempo de Protrombina</label>
-                                            </div>
-                                            <span class="input-group-text">Segundos
-                                            </span>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <div class="input-group">
-                                            <div class="form-floating">
-                                                <input type="text" class="form-control"
-                                                    id="txteditparcialtromboplastina" name="txtparcialtromboplastina"
-                                                    placeholder="dni" minlength="8" maxlength="8">
-                                                <label for="txteditparcialtromboplastina">Tiempo Parcial de
-                                                    Tromboplastina</label>
-                                            </div>
-                                            <span class="input-group-text">Segundos
-                                            </span>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4"></div>
-                                </div> -->
+                                </div>                               
                             </div>
                         </div>
 
@@ -687,7 +681,8 @@
                     <th>CREATININA</th>
                     <th>UREA</th>
                     <th>FIBRINÓGENO</th>
-                    <th>F. REGISTRO</th>
+                    <th style="text-align: center; vertical-align: middle">F. REGISTRO</th>
+                    <th style="text-align: center; vertical-align: middle">H. REGISTRO</th>
                     <th colspan="2">ACCIONES</th>
                 </tr>
             </thead>
@@ -714,7 +709,8 @@
                     <td>{{ hc.creatinina }}</td>
                     <td>{{ hc.urea }}</td>
                     <td>{{ hc.fibrinogeno }}</td>
-                    <td>{{ hc.fecharegistro|date:"d-m-Y H:i A" }}</td>
+                    <td>{{ hc.fecharegistro|date:"d-m-Y" }}</td>
+                    <td>{{ hc.horaregistro|time:"H:i:s" }}</td>
                     <td>
                         <a href="{% url 'edicionHistorial' hc.id %}" data-id="{{ hc.id }}"
                             class="btn btn-outline-primary btnEditar">

@@ -268,6 +268,11 @@ input:-webkit-autofill {
   font-size: 24px;
 }
 
+.fa-circle-question {
+  color: rgb(33, 105, 205);
+  font-size: 24px;
+}
+
 .fa-address-card {
   /* color: rgb(33, 105, 205); */
   font-size: 25px;
@@ -1077,6 +1082,25 @@ a.sidebar-link:hover {
 
 .opcion-menu:last-child {
   border-bottom: none;
+}
+
+.tooltip-inner {
+  background-color: #1e88e5; 
+  color: #ffffff; 
+  font-size: 14px; 
+  font-weight: bold; 
+  padding: 10px; 
+  border-radius: 8px; 
+  border: 1px solid #ffffff;
+}
+
+.tooltip {
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
+}
+
+.tooltip.show {
+  opacity: 1;
 }
 
 #proporcionRiesgoChart, #tasaIntervencionChart, #tiempoPromedioDeteccionChart, #casosSeveraLeveChart {

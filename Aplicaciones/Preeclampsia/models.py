@@ -48,7 +48,8 @@ class Paciente(models.Model):
 class HistoriaClinica(models.Model):
     id = models.BigAutoField(primary_key=True)
     paciente = models.ForeignKey(Paciente, on_delete=models.CASCADE)  
-    fechaconsulta = models.DateTimeField(auto_now_add=True)
+    horaregistro = models.TimeField()
+    fecharegistro = models.DateField()
     # Nuevos paramatros para el diagnostico
     edadgestacional = models.PositiveIntegerField(null=True, blank=True)
     periodointergenesico = models.PositiveIntegerField(null=True, blank=True)
@@ -61,37 +62,27 @@ class HistoriaClinica(models.Model):
     presionsistolica2 = models.PositiveIntegerField()  
     presiondiastolica2 = models.PositiveIntegerField()
     testdeass = models.PositiveIntegerField()
-    proteinaorina = models.DecimalField(max_digits=7, decimal_places=2)
-    tgo = models.PositiveIntegerField(null=True, blank=True)
-    tgp = models.PositiveIntegerField(null=True, blank=True)
+    proteinaorina = models.DecimalField(max_digits=7, decimal_places=2, null=True, blank=True)
+    tgo = models.DecimalField(max_digits=7, decimal_places=2, null=True, blank=True)
+    tgp = models.DecimalField(max_digits=7, decimal_places=2, null=True, blank=True)
     creatinina = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
-    urea = models.PositiveIntegerField(null=True, blank=True)
-    fibrinogeno = models.PositiveIntegerField(null=True, blank=True)
-    fecharegistro = models.DateTimeField(auto_now_add=True)
-    
-    """presionsistolica = models.PositiveIntegerField()  
-    presiondiastolica = models.PositiveIntegerField()  
-    proteinaorina = models.DecimalField(max_digits=5, decimal_places=2)  
-    historiafamiliar = models.CharField(max_length=2)  
-    diabetesgest = models.CharField(max_length=2)  
-    imc = models.DecimalField(max_digits=5, decimal_places=2)  
-    testdeas = models.CharField(max_length=2, null=True, blank=True)  
-    creatinina = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True) 
-    fecharegistro = models.DateTimeField(auto_now_add=True)"""
+    urea = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    fibrinogeno = models.DecimalField(max_digits=7, decimal_places=2, null=True, blank=True)
     
     def __str__(self):
-        return f"{self.paciente} {self.fechaconsulta}"
+        return f"{self.paciente} {self.fecharegistro} {self.horaregistro}"
 
 class Diagnostico(models.Model):
     id = models.BigAutoField(primary_key=True)
     paciente = models.ForeignKey(Paciente, on_delete=models.CASCADE)  
     personal = models.ForeignKey(Personal, on_delete=models.CASCADE)  
     historia_clinica = models.ForeignKey(HistoriaClinica, on_delete=models.CASCADE)
-    fecha_prediccion = models.DateTimeField(auto_now_add=True)
+    hora_prediccion = models.TimeField()
+    fecha_prediccion = models.DateField()
     riesgo = models.DecimalField(max_digits=5, decimal_places=2)  
-    nivelriesgo = models.CharField(max_length=20, choices=[('Leve', 'Leve'), ('Severa', 'Severa')])
+    nivelriesgo = models.CharField(max_length=20, choices=[('No Preeclampsia', 'No Preeclampsia'), ('Preeclampsia', 'Preeclampsia'), ('Leve', 'Leve'), ('Severa', 'Severa')])
     estado = models.CharField(max_length=20, choices=[('Evaluado', 'Evaluado'), ('Proceso', 'Proceso')])  
     detalles = models.TextField(null=True, blank=True)  # Puede ser nulo
 
     def __str__(self):
-        return f"{self.paciente} {self.personal} {self.fecha_prediccion} {self.riesgo} {self.nivelriesgo} {self.estado}"
+        return f"{self.paciente} {self.personal} {self.hora_prediccion} {self.fecha_prediccion} {self.riesgo} {self.nivelriesgo} {self.estado}"

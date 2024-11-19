@@ -24,6 +24,8 @@
                             <div class="form-floating mb-3">
                                 <select class="form-select" id="filtroRiesgo" aria-label="Estado">
                                     <option value="">Seleccione el riesgo</option>
+                                    <option value="No Preeclampsia">No Preeclampsia</option>
+                                    <option value="Preeclampsia">Preeclampsia</option>
                                     <option value="Leve">Leve</option>
                                     <option value="Severa">Severa</option>
                                 </select>
@@ -117,12 +119,13 @@
                                             <select class="form-select" id="txtperiodointerg" name="txtperiodointerg"
                                                 aria-label="Floating label select example">
                                                 <option selected>Seleccione</option>
-                                                <option>1</option>
-                                                <option>2</option>
-                                                <option>3</option>
-                                                <option>4</option>
-                                                <option>5</option>
-                                                <option>6</option>
+                                                <option value="0">Primigesta (Gestante Primeriza)</option>
+                                                <option value="1">1 Año</option>
+                                                <option value="2">2 Años</option>
+                                                <option value="3">3 Años</option>
+                                                <option value="4">4 Años</option>
+                                                <option value="5">5 Años</option>
+                                                <option value="6">>6 Años</option>
                                             </select>
                                             <label for="txtperiodointerg">Periodo intergenésico (Años)</label>
                                         </div>
@@ -493,14 +496,23 @@
                                                 <label for="txteditnombrespaciente">Nombres Paciente</label>
                                             </div>
                                         </div>
+                                        <div class="col-md-12">
+                                            <div class="form-floating mb-3">
+                                                <input type="time" class="form-control" id="txtedithoradiagnostico"
+                                                    name="txtedithoradiagnostico" value="{{diagnostico.hora_prediccion}}"
+                                                    placeholder="Hora">
+                                                <label for="txtedithoradiagnostico">Hora</label>
+                                            </div>
+                                        </div>                                        
                                     </div>
                                     <div class="col-md-6">
                                         <div class="form-floating mb-3">
-                                            <input type="text" class="form-control" id="txteditfechadiagnostico"
+                                            <input type="date" class="form-control" id="txteditfechadiagnostico"
                                                 name="txteditfechadiagnostico" value="{{diagnostico.fecha_prediccion}}"
-                                                placeholder="Ingresar Fecha" readonly>
+                                                placeholder="Ingresar Fecha">
                                             <label for="txteditfechadiagnostico">Fecha Diagnostico</label>
                                         </div>
+
                                         <div class="form-floating mb-3">
                                             <input type="text" class="form-control" id="txteditriesgo"
                                                 name="txteditriesgo" value="{{diagnostico.riesgo}}"
@@ -535,7 +547,6 @@
 
                             </div>
                         </div>
-
 
                         <div class="form-floating mb-3">
                             <button type="submit" id="btnGuardarCambios" class="btn btn-primary text-while">
