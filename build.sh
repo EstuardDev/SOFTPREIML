@@ -14,7 +14,7 @@ python manage.py collectstatic --no-input
 python manage.py makemigrations --no-input
 
 # 3.1 Ejecutar la migracion total
-python manage.py migrate --no-input
+python manage.py migrate
 
 # 4. Crear grupos
 python -c "

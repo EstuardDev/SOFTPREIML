@@ -1,4 +1,5 @@
 from django.db import models
+from datetime import time
 from django.contrib.auth.models import User, Group
 from django.db.models.signals import post_save
 from django.dispatch import receiver
@@ -77,7 +78,7 @@ class Diagnostico(models.Model):
     paciente = models.ForeignKey(Paciente, on_delete=models.CASCADE)  
     personal = models.ForeignKey(Personal, on_delete=models.CASCADE)  
     historia_clinica = models.ForeignKey(HistoriaClinica, on_delete=models.CASCADE)
-    hora_prediccion = models.TimeField()
+    hora_prediccion = models.TimeField(default=time(0, 0))
     fecha_prediccion = models.DateField()
     riesgo = models.DecimalField(max_digits=5, decimal_places=2)  
     nivelriesgo = models.CharField(max_length=20, choices=[('No Preeclampsia', 'No Preeclampsia'), ('Preeclampsia', 'Preeclampsia'), ('Leve', 'Leve'), ('Severa', 'Severa')])
