@@ -11,11 +11,10 @@ pip install -r requirements.txt
 python manage.py collectstatic --no-input
 
 # 3. Ejecutar las migraciones si hubo cambios en models
-python manage.py migrate --fake Preeclampsia  # Marca la migración como aplicada sin cambios
+python manage.py makemigrations Preeclampsia 
 
-# Luego, crea nuevas migraciones y aplícalas
-python manage.py makemigrations
-python manage.py migrate --no-input
+# 3.1 Ejecutar la migracion total
+python manage.py migrate
 
 # 4. Crear grupos
 python -c "
