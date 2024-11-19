@@ -22,13 +22,13 @@ admin.site.register(Paciente, pacienteAdmin),
 
 #TABLA HISTORIALCLINICO
 class historialAdmin(admin.ModelAdmin):
-    list_display = ('id', 'paciente', 'fechaconsulta', 'fecharegistro')
+    list_display = ('id', 'paciente', 'fecharegistro', 'horaregistro')
     
 admin.site.register(HistoriaClinica, historialAdmin),
 
 #TABLA DIAGNOSTICOS
 
 class diagnosticoAdmin(admin.ModelAdmin):
-    list_display = ('id', 'paciente', 'personal', 'fecha_prediccion', 'riesgo', 'nivelriesgo', 'estado')
+    list_display = ('id', 'paciente', 'personal', 'hora_prediccion', 'fecha_prediccion', 'riesgo', 'nivelriesgo', 'estado')
     
 admin.site.register(Diagnostico, diagnosticoAdmin),
