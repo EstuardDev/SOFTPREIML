@@ -700,7 +700,7 @@ def guardarDiagnostico(request):
             hora_actual = datetime.now().time()
             
             paciente = Paciente.objects.get(dni=dni)  # Asegúrate de que el paciente existe
-            historiaclinica = HistoriaClinica.objects.filter(paciente=paciente).latest('fechaconsulta')
+            historiaclinica = HistoriaClinica.objects.filter(paciente=paciente).latest('fecharegistro')
             diagnostico = Diagnostico(
                 paciente=paciente,
                 personal=request.user.personal, 
