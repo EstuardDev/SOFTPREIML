@@ -233,15 +233,17 @@ document.addEventListener("DOMContentLoaded", function () {
         };
 
         prChart.on('mouseover', function (params) {
-            if (params.dataIndex === 1) { 
+            if (params.dataIndex === 'pie') { 
                 prOption.series[0].label.show = false;
                 prChart.setOption(prOption, true);
             }
         });
 
         prChart.on('mouseout', () => {
-            prOption.series[0].label.show = true;
-            prChart.setOption(prOption, true);
+            if (params.seriesType === 'pie') { 
+                prOption.series[0].label.show = true; 
+                prChart.setOption(prOption, true);
+            }
         });
 
         prChart.setOption(prOption);
