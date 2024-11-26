@@ -387,24 +387,50 @@ def editarPaciente(request):
         "message": "Método no permitido."
     })
 
-def buscarPaciente(request, dni):
-    try:
-        paciente = Paciente.objects.get(dni=dni)
-        data = {
-            "success": True,
-            "paciente": {
-                "dni": paciente.dni,
-                "nombre": paciente.nombre,
-                "apellidos": paciente.apellidos,
-                "edad": paciente.edad,
+def buscarPaciente(request, dni): 
+    try: 
+        paciente = Paciente.objects.get(dni=dni) 
+        historial = HistoriaClinica.objects.filter(paciente=paciente).order_by('-fecharegistro').first()
+        
+        pasBasal = None
+        padBasal = None
+        periodoIntergenesico = None
+        edadGestacional = None
+        embarazoNuevaPareja = None
+        hipertensionCronica = None
+        
+        if historial:
+            pasBasal = historial.pasistolicabasal
+            padBasal = historial.padiastolicabasal
+            periodoIntergenesico = historial.periodointergenesico
+            edadGestacional = historial.edadgestacional
+            embarazoNuevaPareja = historial.embarazonuevopareja
+            hipertensionCronica = historial.hipertensioncronica
+            
+            if edadGestacional is not None:
+                edadGestacional += 1
+            
+        data = { 
+            "success": True, 
+            "paciente": { 
+                "dni": paciente.dni, 
+                "nombre": paciente.nombre, 
+                "apellidos": paciente.apellidos, 
+                "edad": paciente.edad, 
                 "numgestacion": paciente.numgestacion,
-            }            
-        }
-    except Paciente.DoesNotExist:
-        data = {
-            "success": False,
-            "message": "El paciente no existe."
-        }
+                "pasBasal": pasBasal,
+                "padBasal": padBasal,
+                "periodoIntergenesico": periodoIntergenesico,
+                "edadGestacional": edadGestacional,
+                "embarazoNuevaPareja": embarazoNuevaPareja,
+                "hipertensionCronica": hipertensionCronica,
+            } 
+        } 
+    except Paciente.DoesNotExist: 
+        data = { 
+            "success": False, 
+            "message": "El paciente no existe." 
+        } 
     return JsonResponse(data)
 
 def eliminarPaciente(request, dni):
@@ -729,7 +755,7 @@ def guardarDiagnostico(request):
                 'message': 'Error en los datos proporcionados.'
             })
         except Exception as e:
-            print(f"Error: {e}")
+            # print(f"Error: {e}")
             return JsonResponse({
                 'success': False,
                 'message': 'Hubo un problema al guardar el diagnóstico.'

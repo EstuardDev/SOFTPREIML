@@ -80,7 +80,6 @@ document.addEventListener('DOMContentLoaded', function () {
             fetch(`/buscarHistorial/${dni}`)
                 .then(response => response.json())
                 .then(data => {
-                    console.log(data);
                     if (data.success) {
                         // Asignar los valores obtenidos al formulario
                         txtnombre.value = data.paciente.nombre;
@@ -113,7 +112,6 @@ document.addEventListener('DOMContentLoaded', function () {
                         txtnombre.value = '';
                         txtapellido.value = '';
                         txtedad.value = '';
-                        // txtfecha.value = '';
                         txtedadgestacional.value = '';
                         txtperiodointerg.value = '';
                         txtembarazonuevapareja.value = '';
@@ -123,8 +121,8 @@ document.addEventListener('DOMContentLoaded', function () {
                         txtsistolicaM1.value = '';
                         txtdiastolicaM1.value = '';
                         txtsistolicaM2.value = '';
-                        txtdiastolicaM2.value =
-                            txttestdeass.value = '';
+                        txtdiastolicaM2.value = '';
+                        txttestdeass.value = '';
                         txtproteinuria.value = '';
                         txttgo.value = '';
                         txttgp.value = '';
@@ -132,7 +130,6 @@ document.addEventListener('DOMContentLoaded', function () {
                         txturea.value = '';
                         txtfibrinogeno.value = '';
                     }
-                    console.log(txtsistolicaM2);
                 })
                 .catch(error => {
                     console.error('Error:', error);
@@ -205,17 +202,14 @@ document.addEventListener('DOMContentLoaded', function () {
                                 // Formatear las fechas y agregar los datos a la tabla
                                 diagnostico.forEach((item, index) => {
                                     // Asegurarse de que las fechas sean válidas
-                                    const fechaPrediccion = new Date(item.fecha_prediccion);
-
-                                    const dia = ('0' + fechaPrediccion.getDate()).slice(-2);  // Aseguramos dos dígitos para el día
-                                    const mes = ('0' + (fechaPrediccion.getMonth() + 1)).slice(-2);  // Aseguramos dos dígitos para el mes
-                                    const año = fechaPrediccion.getFullYear();
-                                    const fechaFormateada = `${año}-${mes}-${dia}`;
+                                    const fechaPrediccionString = item.fecha_prediccion;
+                                    const [year, month, day] = fechaPrediccionString.split('-');
+                                    const fechaPrediccionFormateada = `${day}-${month}-${year}`;
 
                                     const row = document.createElement('tr');
                                     row.innerHTML = `
                                         <td>${index + 1}</td>
-                                        <td>${fechaFormateada}</td>
+                                        <td>${fechaPrediccionFormateada}</td>
                                         <td>${item.riesgo}</td>
                                         <td>${nivelRiesgoBadge(item.nivelriesgo)}</td>
                                         <td>${estadoBadge(item.estado)}</td>
@@ -327,19 +321,12 @@ document.addEventListener('DOMContentLoaded', function () {
                     // console.log(data)
                     if (data.success) {
 
-                        // Formatear la fecha a m-d-y h:m PM/AM
                         const fechaPrediccion = new Date(data.diagnostico.fecha_prediccion);
-                        const horaPrediccion = data.diagnostico.hora_prediccion; // Asumiendo que esto viene en formato HH:MM:SS
+                        const horaPrediccion = data.diagnostico.hora_prediccion; 
+                        const fechaFormateada = fechaPrediccion.toISOString().split('T')[0];
+                        const [horas, minutos, segundos] = horaPrediccion.split(':');
 
-                        // Formatear la fecha a d-m-y
-                        const dia = ('0' + fechaPrediccion.getDate()).slice(-2);  // Aseguramos dos dígitos para el día
-                        const mes = ('0' + (fechaPrediccion.getMonth() + 1)).slice(-2);  // Aseguramos dos dígitos para el mes
-                        const año = fechaPrediccion.getFullYear();
-                        const fechaFormateada = `${año}-${mes}-${dia}`; // Formato yyyy-mm-dd para un campo de tipo date
-
-                        // Asumir que horaPrediccion está en formato HH:MM:SS
-                        const [horas, minutos] = horaPrediccion.split(':');
-                        const horaFormateada = `${horas}:${minutos}`;
+                        const horaFormateada = `${('0' + horas).slice(-2)}:${('0' + minutos).slice(-2)}:${('0' + segundos).slice(-2)}`;
 
                         document.querySelector('#txteditid').value = data.diagnostico.id;
                         document.querySelector('#txteditnombrespaciente').value = data.diagnostico.paciente;

@@ -58,7 +58,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const dni = txtDni.value.trim();
             if (dni.length === 0) {
                 Swal.fire({
-                    title: 'Error!',
+                    title: 'Advertencia!',
                     text: 'Por favor, ingrese un DNI.',
                     icon: 'warning'
                 });
@@ -68,11 +68,21 @@ document.addEventListener('DOMContentLoaded', function () {
             fetch(`/buscarPaciente/${dni}`)
                 .then(response => response.json())
                 .then(data => {
+                    console.log(data);
                     if (data.success) {
                         txtNombre.value = data.paciente.nombre;
                         txtApellido.value = data.paciente.apellidos;
                         txtedad.value = data.paciente.edad;
-                        txtedadgestacional.value = data.paciente.numgestacion;
+
+                        if (data.paciente.edadGestacional !== null) {
+                            txtedadgestacional.value = data.paciente.edadGestacional;
+                        } else {
+                            txtedadgestacional.value = data.paciente.numgestacion; // Campo de Edad Gestacional                            
+                        }
+
+                        txtperiodointerg.value = data.paciente.periodoIntergenesico !== null ? data.paciente.periodoIntergenesico : '';
+                        txtembarazonuevapareja.value = data.paciente.embarazoNuevaPareja !== null ? data.paciente.embarazoNuevaPareja : '';
+                        txthipertCronica.value = data.paciente.hipertensionCronica !== null ? data.paciente.hipertensionCronica : '';
                     } else {
                         Swal.fire({
                             title: 'No encontrado!',
@@ -83,6 +93,9 @@ document.addEventListener('DOMContentLoaded', function () {
                         txtApellido.value = '';
                         txtedad.value = '';
                         txtedadgestacional.value = '';
+                        txtperiodointerg.value = '';
+                        txtembarazonuevapareja.value = '';
+                        txthipertCronica.value = '';
                     }
                 })
                 .catch(error => {
@@ -204,19 +217,12 @@ document.addEventListener('DOMContentLoaded', function () {
                     // console.log(data);
                     if (data.success) {
 
-                        // Formatear la fecha a m-d-y h:m PM/AM
                         const fecharegistro = new Date(data.historial.fecharegistro);
-                        const horaregistro = new Date(`1970-01-01T${data.historial.horaregistro}`); // Asumimos que horaregistro es un string en formato "HH:MM:SS"
-
-                        // Formatear la fecha a yyyy-mm-dd
+                        const horaregistro = data.historial.horaregistro;
                         const fechaFormateada = fecharegistro.toISOString().split('T')[0]; // yyyy-mm-dd
-
-                        // Formatear la hora a hh:mm:ss
-                        // const horas = ('0' + horaregistro.getUTCHours()).slice(-2);
-                        // const minutos = ('0' + horaregistro.getUTCMinutes()).slice(-2);
-                        // const segundos = ('0' + horaregistro.getUTCSeconds()).slice(-2);
-                        const horaFormateada = horaregistro; // hh:mm:ss
-
+                        const [horas, minutos, segundos] = horaregistro.split(':');
+                        const horaFormateada = `${('0' + horas).slice(-2)}:${('0' + minutos).slice(-2)}:${('0' + segundos).slice(-2)}`;
+                        
                         // Rellena el formulario de edición con los datos obtenidos                        
                         document.querySelector('#txteditid').value = data.historial.id;
                         document.querySelector('#txteditdni').value = data.historial.dni;
