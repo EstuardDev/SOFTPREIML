@@ -143,7 +143,6 @@ def inicio(request):
     pacientes = Paciente.objects.all().count()
     medicos = Personal.objects.all().count()
     historias_clinicas = HistoriaClinica.objects.all().count()
-    # diagnosticos = Diagnostico.objects.all().order_by('-id')[:5]  # Obtener los últimos 5 diagnósticos
     diagnosticos = Diagnostico.objects.order_by('paciente', '-fecha_prediccion').distinct('paciente')[:5]
     
     # Calcular los indicadores
@@ -473,7 +472,7 @@ def guardarHistorial(request):
         presiondiastolica1 =request.POST['txtdiastolicaM1']
         presionsistolica2 = request.POST['txtsistolicaM2']
         presiondiastolica2 = request.POST['txtdiastolicaM2']
-        testdeass = request.POST['txttestdeass']
+        testdeass = float(request.POST.get('txttestdeass', '0.0') or '0.0')
         proteinaorina = float(request.POST.get('txtproteinuria', '0.0') or '0.0')
         tgo = float(request.POST.get('txttgo', '0.0') or '0.0')
         tgp = float(request.POST.get('txttgp', '0.0') or '0.0')
@@ -482,10 +481,8 @@ def guardarHistorial(request):
         fibrinogeno = float(request.POST.get('txtfibrinogeno', '0.0') or '0.0')
         try:
             paciente = Paciente.objects.get(dni=dni)
-            # Obtener la fecha actual
-            fecha_actual = datetime.now().date()  # Solo la fecha
-            # Obtener la hora actual (si deseas establecerla manualmente)
-            hora_actual = datetime.now().time()  # Solo la hora
+            fecha_actual = datetime.now().date()
+            hora_actual = datetime.now().time()
             HistoriaClinica.objects.create(paciente=paciente,horaregistro=hora_actual, fecharegistro=fecha_actual, edadgestacional=edadgestacional, periodointergenesico=periodointergenesico,
                                            embarazonuevopareja=embarazonuevopareja, hipertensioncronica=hipertensioncronica, 
                                            pasistolicabasal=pasistolicabasal, padiastolicabasal=padiastolicabasal, presionsistolica1=presionsistolica1, 
@@ -661,7 +658,7 @@ def guardarDiagnostico(request):
             presion_diastolica1 = float(request.POST.get('txtdiastolicaM1', '0') or '0')
             presion_sistolica2 = float(request.POST.get('txtsistolicaM2', '0') or '0')
             presion_diastolica2 = float(request.POST.get('txtdiastolicaM2', '0') or '0')
-            test_de_as = 1 if request.POST.get('txttestdeass') == 'SI' else 0
+            test_de_as = float(request.POST.get('txttestdeass', '0') or '0')
             proteina_orina = float(request.POST.get('txtproteinuria', '0') or '0')
             proteinuria_g = proteina_orina / 1000
             tgo = float(request.POST.get('txttgo', '0') or '0')
@@ -927,23 +924,17 @@ def calcular_indicadores(request):
 # 1. Cálculo del Tiempo Promedio de Detección por paciente(TPD)
 def calcular_tiempo_deteccion(diagnostico):
     try:
-        # Obtener la hora de predicción del diagnóstico
         tiempo_final = diagnostico.hora_prediccion
-        # Obtener el historial clínico relacionado con el diagnóstico
         historial = diagnostico.historia_clinica
-        # Obtener la hora de registro del historial
         tiempo_inicio = historial.horaregistro
 
         if tiempo_final and tiempo_inicio:
-            # Combinar la fecha actual con las horas para calcular la diferencia
             ahora = datetime.now()
             tiempo_final_completo = datetime.combine(ahora.date(), tiempo_final)
             tiempo_inicio_completo = datetime.combine(ahora.date(), tiempo_inicio)
 
-            # Calcular la diferencia de tiempo
             tiempo_deteccion = tiempo_final_completo - tiempo_inicio_completo
             
-            # Asegurarse de que la diferencia no sea negativa
             if tiempo_deteccion < timedelta(0):
                 return "00:00:00"
 
@@ -965,40 +956,48 @@ def calcular_tiempo_deteccion(diagnostico):
 # Cálculo del Tiempo Promedio de Detección nivel general(TPD)
 def calcular_tiempo_promedio_deteccion():
     try:
-        # Obtener las fechas de inicio y fin de los diagnósticos
         diagnosticos = Diagnostico.objects.all()
         if not diagnosticos.exists():
             return {"TPD_formateado": "0d 00h 00m 00s", "TPD_segundos": 0}
         
-        fecha_inicio = diagnosticos.earliest('historia_clinica__horaregistro').historia_clinica.horaregistro
-        fecha_fin = diagnosticos.latest('fecha_prediccion').fecha_prediccion
+        primer_diagnostico = diagnosticos.earliest('fecha_prediccion')
+        fecha_inicio = primer_diagnostico.fecha_prediccion
+        hora_inicio = primer_diagnostico.hora_prediccion
 
-        # Calcular la diferencia de tiempo en segundos
-        tiempo_total_segundos = (fecha_fin - fecha_inicio).total_seconds()
+        datetime_inicio = datetime.combine(fecha_inicio, hora_inicio)
+
+        ultimo_diagnostico = diagnosticos.latest('fecha_prediccion')
+        fecha_fin = ultimo_diagnostico.fecha_prediccion
+        hora_fin = ultimo_diagnostico.hora_prediccion
+
+        datetime_fin = datetime.combine(fecha_fin, hora_fin)
+
+        tiempo_total_segundos = (datetime_fin - datetime_inicio).total_seconds()
         
-        # Obtener el total de pacientes únicos
-        total_pacientes = diagnosticos.values('paciente').distinct().count()
+        total_pacientes = diagnosticos.values('paciente').distinct().count()   
+        print(f"Total de pacientes únicos: {total_pacientes}")
+
         
         if total_pacientes == 0:
             return {"TPD_formateado": "0d 00h 00m 00s", "TPD_segundos": 0}
         
-        # Calcular el tiempo promedio en segundos
         tiempo_promedio_segundos = tiempo_total_segundos / total_pacientes
+        print(f"Tiempo total en segundos: {tiempo_total_segundos}") 
 
-        # Convertir segundos a días, horas, minutos, segundos
         tiempo_promedio = timedelta(seconds=tiempo_promedio_segundos)
         dias = tiempo_promedio.days
         horas, resto = divmod(tiempo_promedio.seconds, 3600)
         minutos, segundos = divmod(resto, 60)
 
-        # Formatear el tiempo
         tiempo_formateado = f"{dias}d {horas:02}h {minutos:02}m {segundos:02}s"
+        print('Tiempo Formateado: ', tiempo_formateado)
         
         return {
             "TPD_formateado": tiempo_formateado,
             "TPD_segundos": round(tiempo_promedio_segundos)
         }
-    except Exception:
+    except Exception as e:
+        print(f"Error al calcular el tiempo promedio de detección: {e}")
         return {"TPD_formateado": "0d 00h 00m 00s", "TPD_segundos": 0}
 
 # 2. Cálculo de la Proporción de Riesgo (PR)
