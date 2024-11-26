@@ -25,9 +25,9 @@
                                 <select class="form-select" id="filtroRiesgo" aria-label="Estado">
                                     <option value="">Seleccione el riesgo</option>
                                     <option value="No Preeclampsia">No Preeclampsia</option>
-                                    <option value="Preeclampsia">Preeclampsia</option>
-                                    <option value="Leve">Leve</option>
-                                    <option value="Severa">Severa</option>
+                                    <option value="Posible desarrollo de preeclampsia">Posible desarrollo de preeclampsia</option>
+                                    <option value="Riesgo Leve">Riesgo Leve</option>
+                                    <option value="Riesgo Severo">Riesgo Severo</option>
                                 </select>
                                 <label for="filtroRiesgo">Riesgo</label>
                             </div>
@@ -249,11 +249,11 @@
                                                 <select class="form-select" id="txttestdeass" name="txttestdeass"
                                                     aria-label="Floating label select example">
                                                     <option selected>Seleccione</option>
-                                                    <option value="0">Negativo</option>
-                                                    <option value="0.5">Trazadas</option>
-                                                    <option value="1">1</option>
-                                                    <option value="2">2</option>
-                                                    <option value="3">3</option>
+                                                    <option value="0.00">Negativo</option>
+                                                    <option value="0.50">Trazadas</option>
+                                                    <option value="1.00">1 (+)</option>
+                                                    <option value="2.00">2 (++)</option>
+                                                    <option value="3.00">3 (+++)</option>
                                                 </select>
                                                 <label for="txttestdeass">Test de ASS (+)</label>
                                             </div>
@@ -611,8 +611,9 @@
                     <th>F. REGISTRO</th>
                     <th>PAM (mmHg)</th>
                     <th>POSIBILIDAD DE RIESGO</th>
+                    <th>DETALLES</th>
                     <th>ESTADO</th>
-                    <th colspan="2">ACCIONES</th>
+                    <th colspan="3">ACCIONES</th>
                 </tr>
                 {% else %}
                 <tr>
@@ -621,8 +622,9 @@
                     <th>F. REGISTRO</th>
                     <th>PAM (mmHg)</th>
                     <th>POSIBILIDAD DE RIESGO</th>
+                    <th>DETALLES</th>
                     <th>ESTADO</th>
-                    <th colspan="2">ACCIONES</th>
+                    <th colspan="3">ACCIONES</th>
                 </tr>
                 {% endif %}
             </thead>
@@ -633,17 +635,17 @@
                     <td>{{ forloop.counter }}</td>
                     <td style="text-align: left;">{{ dg.paciente }}</td>
                     <td>{{ dg.personal }}</td>
-                    <td>{{ dg.fecha_prediccion|date:"d-m-Y H:i A" }}</td>
+                    <td>{{ dg.fecha_prediccion|date:"d-m-Y" }}</td>
                     <td>{{ dg.riesgo }}</td>
                     <td>
                         {% if dg.nivelriesgo == 'No Preeclampsia' %}
                         <span class="badge bg-success">{{ dg.nivelriesgo }}</span>
                         {% elif dg.nivelriesgo == 'Preeclampsia' %}
-                        <span class="badge bg-info">{{ dg.nivelriesgo }}</span>
+                        <span class="badge bg-info">Posible desarrollo de preeclampsia</span>
                         {% elif dg.nivelriesgo == 'Leve' %}
-                        <span class="badge bg-warning">{{ dg.nivelriesgo }}</span>
+                        <span class="badge bg-warning">Riesgo Leve</span>
                         {% elif dg.nivelriesgo == 'Severa' %}
-                        <span class="badge bg-danger">{{ dg.nivelriesgo }}</span>
+                        <span class="badge bg-danger">Riesgo Severo</span>
                         {% endif %}
                     </td>
                     <td>{{ dg.detalles }}</td>
@@ -686,17 +688,17 @@
                 <tr>
                     <td>{{ forloop.counter }}</td>
                     <td style="text-align: left;">{{ dg.paciente }}</td>
-                    <td>{{ dg.fecha_prediccion|date:"d-m-Y H:i A" }}</td>
+                    <td>{{ dg.fecha_prediccion|date:"d-m-Y" }}</td>
                     <td>{{ dg.riesgo }}</td>
                     <td>
                         {% if dg.nivelriesgo == 'No Preeclampsia' %}
                         <span class="badge bg-success">{{ dg.nivelriesgo }}</span>
                         {% elif dg.nivelriesgo == 'Preeclampsia' %}
-                        <span class="badge bg-info">{{ dg.nivelriesgo }}</span>
+                        <span class="badge bg-info">Posible desarrollo de preeclampsia</span>
                         {% elif dg.nivelriesgo == 'Leve' %}
-                        <span class="badge bg-warning">{{ dg.nivelriesgo }}</span>
+                        <span class="badge bg-warning">Riesgo Leve</span>
                         {% elif dg.nivelriesgo == 'Severa' %}
-                        <span class="badge bg-danger">{{ dg.nivelriesgo }}</span>
+                        <span class="badge bg-danger">Riesgo Severo</span>
                         {% endif %}
                     </td>
                     <td>{{ dg.detalles }}</td>

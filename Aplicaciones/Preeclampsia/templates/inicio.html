@@ -186,43 +186,46 @@
         <div class="row col-xs-12 col-sm-12 col-md-12 col-lg-12 col-xl-12">
             <h1>Tareas Diarias </h1>
             <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6 col-xl-6 py-2">
-                <div class="card shadow">
-                    <div class="card-body">
-                        <div class="d-flex">
-                            <div class="flex-grow-1">
-                                <p class="text-muted">Pacientes</p>
-                                <h4 class="mb-0">{{ pacientes }}</h4>
-                            </div>
-                            <div class="flex-shrink-0 align-self-center">
-                                <div class="mini-stat-icon avatar-sm rounded-circle bg-light">
-                                    <span class="avatar-title">
-                                        <i class="fa-solid fa-person-pregnant"></i>
-                                    </span>
+                <a href="{% url 'paciente' %}">
+                    <div class="card shadow">
+                        <div class="card-body">
+                            <div class="d-flex">
+                                <div class="flex-grow-1">
+                                    <p class="text-muted">Pacientes</p>
+                                    <h4 class="mb-0">{{ pacientes }}</h4>
+                                </div>
+                                <div class="flex-shrink-0 align-self-center">
+                                    <div class="mini-stat-icon avatar-sm rounded-circle bg-light">
+                                        <span class="avatar-title">
+                                            <i class="fa-solid fa-person-pregnant"></i>
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
+                </a>
             </div>
             <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6 col-xl-6 py-2">
-                <div class="card shadow">
-                    <div class="card-body">
-                        <div class="d-flex">
-                            <div class="flex-grow-1">
-                                <p class="text-muted">Total Historial Clínico</p>
-                                <h4 class="mb-0">{{ historias_clinicas }}</h4>
-                            </div>
-
-                            <div class="flex-shrink-0 align-self-center">
-                                <div class="mini-stat-icon avatar-sm rounded-circle bg-light">
-                                    <span class="avatar-title">
-                                        <i class="fa-solid fa-receipt"></i>
-                                    </span>
+                <a href="{% url 'medico' %}">
+                    <div class="card shadow">
+                        <div class="card-body">
+                            <div class="d-flex">
+                                <div class="flex-grow-1">
+                                    <p class="text-muted">Total Historial Clínico</p>
+                                    <h4 class="mb-0">{{ historias_clinicas }}</h4>
+                                </div>
+                                <div class="flex-shrink-0 align-self-center">
+                                    <div class="mini-stat-icon avatar-sm rounded-circle bg-light">
+                                        <span class="avatar-title">
+                                            <i class="fa-solid fa-receipt"></i>
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
+                </a>                
             </div>
         </div>
     </section>

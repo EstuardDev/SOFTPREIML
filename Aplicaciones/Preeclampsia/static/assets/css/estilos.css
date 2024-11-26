@@ -930,6 +930,7 @@ a.sidebar-link:hover {
 .table-responsive {
   margin-top: 12px;
   border-radius: 8px;
+  -webkit-overflow-scrolling: touch;
 }
 
 .table-striped thead {
@@ -946,7 +947,8 @@ a.sidebar-link:hover {
 .table-responsive table th,
 .table-responsive table td {
   text-align: center;
-  vertical-align: middle;
+  vertical-align: middle;  
+  white-space: nowrap; 
 }
 
 #pagination-controls {
@@ -1094,6 +1096,11 @@ a.sidebar-link:hover {
   border: 1px solid #ffffff;
 }
 
+.ellipsis {
+  margin: 0 5px;
+  color: #000;
+}
+
 .tooltip {
   opacity: 0;
   transition: opacity 0.3s ease-in-out;
@@ -1115,7 +1122,40 @@ a.sidebar-link:hover {
   }
 }
 
-/* Definir breakpoints */
+@media (max-width: 320px) {
+  .table tbody td, .table thead th {
+      font-size: 0.7rem;
+  }
+
+  .table tbody td {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+  }
+}
+
+@media (max-width: 768px) {
+  .table tbody td, .table thead th {
+      font-size: 0.8rem;
+  }
+
+  .table {
+      border-spacing: 0;
+  }
+
+  .table tbody td {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+  }
+}
+
+@media (min-width: 1024px) {
+  .table tbody td, .table thead th {
+      font-size: 1rem;
+  }
+}
+
 @media (max-width: 320px) {
   /* Estilos para teléfonos móviles */
   .wrapper {

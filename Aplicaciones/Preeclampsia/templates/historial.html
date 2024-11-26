@@ -56,6 +56,12 @@
                             </div>
                             <div class="bloque1">
                                 <div class="row">
+                                    <div class="alert alert-primary" role="alert">
+                                        <strong>Nota:</strong> Para evaluar el riesgo de preeclampsia, no es necesario
+                                        ingresar todos los valores de laboratorio incluyendo Proteina en Orina. Sin
+                                        embargo, para determinar la severidad
+                                        del riesgo, se requieren todos los datos clínicos y de laboratorio.
+                                    </div>
                                     <div class="col-md-6">
                                         <div class="form-floating mb-3">
                                             <div class="input-group">
@@ -260,11 +266,7 @@
                         <!-- Section 3: Otros factores -->
                         <div class="card mb-2">
                             <div class="card-header">
-                                <h3>Laboratorio</h3>
-                                <div class="alert alert-primary" role="alert">
-                                    <strong>Nota:</strong> Para evaluar el riesgo de preeclampsia, no es necesario ingresar todos los valores de laboratorio incluyendo la Proteina en Orina. Sin embargo, 
-                                    para determinar la severidad del riesgo, se requieren todos los datos clínicos y de laboratorio.
-                                </div>
+                                <h3>Laboratorio</h3>                                
                             </div>
                             <div class="bloque3">
                                 <div class="row">
@@ -542,11 +544,11 @@
                                                 <select class="form-select" id="txtedittestdeass" name="txtedittestdeass"
                                                     aria-label="Floating label select example">
                                                     <option selected>Seleccione</option>
-                                                    <option value="0">Negativo</option>
-                                                    <option value="0.5">Trazadas</option>
-                                                    <option value="1">1</option>
-                                                    <option value="2">2</option>
-                                                    <option value="3">3</option>
+                                                    <option value="0.00">Negativo</option>
+                                                    <option value="0.50">Trazadas</option>
+                                                    <option value="1.00">1 (+)</option>
+                                                    <option value="2.00">2 (++)</option>
+                                                    <option value="3.00">3 (+++)</option>
                                                 </select>
                                                 <label for="txtedittestdeass">Test de ASS (+)</label>
                                             </div>

@@ -27,20 +27,15 @@ document.addEventListener('DOMContentLoaded', function () {
 
         const filteredRows = rows.filter(row => {
             const paciente = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
-            const estadoBadge = row.querySelector('td:nth-child(6) span.badge');
+            const estadoBadge = row.querySelector('td:nth-child(5) span.badge');
 
             let estado = '';
-            if (estadoBadge.classList.contains('bg-warning')) {
-                estado = 'leve';
-            } else if (estadoBadge.classList.contains('bg-danger')) {
-                estado = 'severa';
-            } else if (estadoBadge.classList.contains('bg-success')) {
-                estado = 'no preeclampsia';
-            } else if (estadoBadge.classList.contains('bg-info')) {
-                estado = 'preeclampsia';
-            }
+            if (estadoBadge.classList.contains('bg-success')) estado = 'no preeclampsia';
+            else if (estadoBadge.classList.contains('bg-info')) estado = 'posible desarrollo de preeclampsia';
+            else if (estadoBadge.classList.contains('bg-warning')) estado = 'riesgo leve';
+            else if (estadoBadge.classList.contains('bg-danger')) estado = 'riesgo severo';
 
-            const estadoMatch = estadoFilterValue === 'no preeclampsia' ? estado === 'no preeclampsia' : estadoFilterValue === 'preeclampsia' ? estado === 'preeclampsia' : estadoFilterValue === 'leve' ? estado === 'leve' : estadoFilterValue === 'severa' ? estado === 'severa' : true;
+            const estadoMatch = estadoFilterValue ? estado === estadoFilterValue : true;
 
             // Convertimos nuestar fecha de la fila al formato yyyy-mm-dd para comparar
             const fechaCelda = row.querySelector('td:nth-child(4)').textContent;
