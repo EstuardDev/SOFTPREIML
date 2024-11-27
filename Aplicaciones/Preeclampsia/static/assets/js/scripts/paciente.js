@@ -569,7 +569,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     //PAGINACION DE TABLA
-    const rowsPerPage = 5; // Número de filas por página
+    const rowsPerPage = 25; // Número de filas por página
     let currentPage = 1; // Página actual
 
     const table = document.querySelector('#tablaPaciente');

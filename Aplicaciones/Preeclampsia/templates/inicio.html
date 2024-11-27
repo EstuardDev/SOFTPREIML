@@ -157,10 +157,14 @@
                                 <td>{{ dg.personal }}</td>
                                 <td>{{ dg.fecha_prediccion|date:"d-m-Y" }}</td>
                                 <td>
-                                    {% if dg.nivelriesgo == 'Leve' %}
-                                    <span class="badge bg-warning">{{ dg.nivelriesgo }}</span>
+                                    {% if dg.nivelriesgo == 'No Preeclampsia' %}
+                                    <span class="badge bg-success">{{ dg.nivelriesgo }}</span>
+                                    {% elif dg.nivelriesgo == 'Preeclampsia' %}
+                                    <span class="badge bg-info">Posible desarrollo de preeclampsia</span>
+                                    {% elif dg.nivelriesgo == 'Leve' %}
+                                    <span class="badge bg-warning">Riesgo Leve</span>
                                     {% elif dg.nivelriesgo == 'Severa' %}
-                                    <span class="badge bg-danger">{{ dg.nivelriesgo }}</span>
+                                    <span class="badge bg-danger">Riesgo Severo</span>
                                     {% endif %}
                                 </td>
                                 <td>
@@ -274,10 +278,14 @@
                                     <td style="text-align: left;">{{ dg.paciente }}</td>
                                     <td>{{ dg.fecha_prediccion|date:"d-m-Y" }}</td>
                                     <td>
-                                        {% if dg.nivelriesgo == 'Leve' %}
-                                        <span class="badge bg-warning">{{ dg.nivelriesgo }}</span>
+                                        {% if dg.nivelriesgo == 'No Preeclampsia' %}
+                                        <span class="badge bg-success">{{ dg.nivelriesgo }}</span>
+                                        {% elif dg.nivelriesgo == 'Preeclampsia' %}
+                                        <span class="badge bg-info">Posible desarrollo de preeclampsia</span>
+                                        {% elif dg.nivelriesgo == 'Leve' %}
+                                        <span class="badge bg-warning">Riesgo Leve</span>
                                         {% elif dg.nivelriesgo == 'Severa' %}
-                                        <span class="badge bg-danger">{{ dg.nivelriesgo }}</span>
+                                        <span class="badge bg-danger">Riesgo Severo</span>
                                         {% endif %}
                                     </td>
                                 </tr>

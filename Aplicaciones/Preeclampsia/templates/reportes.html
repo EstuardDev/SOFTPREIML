@@ -56,11 +56,11 @@
                                     {% if r.nivelriesgo == 'No Preeclampsia' %}
                                     <span class="badge bg-success">{{ r.nivelriesgo }}</span>
                                     {% elif r.nivelriesgo == 'Preeclampsia' %}
-                                    <span class="badge bg-info">{{ r.nivelriesgo }}</span>
+                                    <span class="badge bg-info">Posible desarrollo de preeclampsia</span>
                                     {% elif r.nivelriesgo == 'Leve' %}
-                                    <span class="badge bg-warning">{{ r.nivelriesgo }}</span>
+                                    <span class="badge bg-warning">Riesgo Leve</span>
                                     {% elif r.nivelriesgo == 'Severa' %}
-                                    <span class="badge bg-danger">{{ r.nivelriesgo }}</span>
+                                    <span class="badge bg-danger">Riesgo Severo</span>
                                     {% endif %}
                                 </td>
                                 <td>{{ r.tiempo_deteccion_formateado }}</td>

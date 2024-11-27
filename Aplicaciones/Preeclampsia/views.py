@@ -1041,16 +1041,16 @@ def calcular_proporcion_riesgo():
 
 # 3. Cálculo de la Tasa de Intervención Efectiva (TIE)
 def calcular_intervencion_efectiva():
-    pacientes_con_leve = Diagnostico.objects.filter(nivelriesgo="Leve").values_list('paciente', flat=True).distinct()
+    pacientes_con_leve_o_preeclampsia = Diagnostico.objects.filter(nivelriesgo__in=["Leve", "Preeclampsia"]).values_list('paciente', flat=True).distinct()
     
     total_leve = 0
     sin_progresion = 0
 
-    for paciente_id in pacientes_con_leve:
+    for paciente_id in pacientes_con_leve_o_preeclampsia:
         diagnosticos_paciente = Diagnostico.objects.filter(paciente_id=paciente_id).order_by('fecha_prediccion')
         
         primer_diagnostico = diagnosticos_paciente.first()
-        if primer_diagnostico and primer_diagnostico.nivelriesgo == "Leve":
+        if primer_diagnostico and primer_diagnostico.nivelriesgo in ["Leve", "Preeclampsia"]:
             total_leve += 1
             progreso_a_severa = False
             
