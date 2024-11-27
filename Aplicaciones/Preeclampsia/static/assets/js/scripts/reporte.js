@@ -232,17 +232,18 @@ document.addEventListener("DOMContentLoaded", function () {
             ]
         };
 
+        // Configuración de eventos para el gráfico
         prChart.on('mouseover', function (params) {
-            if (params.dataIndex === 'pie') { 
-                prOption.series[0].label.show = false;
-                prChart.setOption(prOption, true);
+            if (params.seriesType === 'pie') { // Verifica que el evento proviene del gráfico circular
+                prOption.series[0].label.show = false; // Oculta el label predeterminado
+                prChart.setOption(prOption, true); // Aplica los cambios al gráfico
             }
         });
-
-        prChart.on('mouseout', () => {
-            if (params.seriesType === 'pie') { 
-                prOption.series[0].label.show = true; 
-                prChart.setOption(prOption, true);
+        
+        prChart.on('mouseout', function (params) {
+            if (params.seriesType === 'pie') { // Verifica que el evento proviene del gráfico circular
+                prOption.series[0].label.show = true; // Restaura el label predeterminado
+                prChart.setOption(prOption, true); // Aplica los cambios al gráfico
             }
         });
 

@@ -17,6 +17,94 @@ document.addEventListener('DOMContentLoaded', function () {
 
     let rows = []; // Almacenar todas las filas
 
+    //PAGINACION DE TABLA
+    const rowsPerPage = 25; // Número de filas por página
+    let currentPage = 1; // Página actual
+
+    const table = document.querySelector('#tablaHistorial');
+    const paginationControls = document.querySelector('#pagination-controls');
+
+    function setupPagination(rows) {
+        const totalPages = Math.ceil(rows.length / rowsPerPage);
+        paginationControls.innerHTML = ''; // Limpiar controles de paginación
+
+        // Contenedor para los números de página
+        const pageNumbersContainer = document.createElement('div');
+        pageNumbersContainer.id = 'page-numbers';
+
+        // Botón de página anterior
+        const prevButton = document.createElement('button');
+        prevButton.id = 'anterior';
+        prevButton.className = 'btn btn-primary';
+        prevButton.innerHTML = '<i class="fa-solid fa-chevron-left"></i>';
+        prevButton.disabled = currentPage === 1;
+        prevButton.addEventListener('click', () => {
+            if (currentPage > 1) {
+                currentPage--;
+                displayRows(currentPage, rows);
+                updatePaginationControls(); // Actualizar controles de paginación
+            }
+        });
+        paginationControls.appendChild(prevButton);
+
+        // Botones de páginas
+        for (let i = 1; i <= totalPages; i++) {
+            const pageButton = document.createElement('button');
+            pageButton.className = 'btn';
+            pageButton.textContent = i;
+            pageButton.addEventListener('click', () => {
+                currentPage = i;
+                displayRows(currentPage, rows);
+                updatePaginationControls(); // Actualizar controles de paginación
+            });
+            pageNumbersContainer.appendChild(pageButton);
+        }
+
+        paginationControls.appendChild(pageNumbersContainer);
+
+        // Botón de página siguiente
+        const nextButton = document.createElement('button');
+        nextButton.id = 'siguiente';
+        nextButton.className = 'btn btn-primary';
+        nextButton.innerHTML = '<i class="fa-solid fa-chevron-right"></i>';
+        nextButton.disabled = currentPage === totalPages;
+        nextButton.addEventListener('click', () => {
+            if (currentPage < totalPages) {
+                currentPage++;
+                displayRows(currentPage, rows);
+                updatePaginationControls(); // Actualizar controles de paginación
+            }
+        });
+        paginationControls.appendChild(nextButton);
+
+        // Resaltar el botón de página actual
+        updatePaginationControls();
+    }
+
+    function updatePaginationControls() {
+        const pageButtons = paginationControls.querySelectorAll('#page-numbers button');
+        pageButtons.forEach((button, index) => {
+            button.classList.toggle('active', index + 1 === currentPage);
+        });
+
+        const prevButton = paginationControls.querySelector('#anterior');
+        const nextButton = paginationControls.querySelector('#siguiente');
+
+        prevButton.disabled = currentPage === 1;
+        nextButton.disabled = currentPage === pageButtons.length;
+    }
+
+    function displayRows(page, rows) {
+        const tbody = table.querySelector('tbody');
+        tbody.innerHTML = ''; // Limpiar el cuerpo de la tabla
+
+        const start = (page - 1) * rowsPerPage;
+        const end = start + rowsPerPage;
+        const paginatedRows = rows.slice(start, end);
+
+        paginatedRows.forEach(row => tbody.appendChild(row));
+    }    
+
     // Filtrar las filas de la tabla
     function filterRows() {
         const pacienteFilterValue = filtroPaciente.value.toLowerCase();
@@ -51,6 +139,15 @@ document.addEventListener('DOMContentLoaded', function () {
         setupPagination(filteredRows);
         displayRows(currentPage, filteredRows);
     }
+
+    // Inicializar la tabla con todas las filas
+    function initializeTable() {
+        const tbody = table.querySelector('tbody');
+        rows = Array.from(tbody.querySelectorAll('tr')); // Obtener todas las filas
+        updateTable(rows); // Mostrar todas las filas inicialmente
+    }
+
+    initializeTable(); // Inicializar la tabla al cargar la página
 
     // Buscar Paciente por DNI
     if (btnBuscar) {
@@ -338,104 +435,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (select) {
             select.value = value;
         }
-    }
-
-    //PAGINACION DE TABLA
-    const rowsPerPage = 5; // Número de filas por página
-    let currentPage = 1; // Página actual
-
-    const table = document.querySelector('#tablaHistorial');
-    const paginationControls = document.querySelector('#pagination-controls');
-
-    function setupPagination(rows) {
-        const totalPages = Math.ceil(rows.length / rowsPerPage);
-        paginationControls.innerHTML = ''; // Limpiar controles de paginación
-
-        // Contenedor para los números de página
-        const pageNumbersContainer = document.createElement('div');
-        pageNumbersContainer.id = 'page-numbers';
-
-        // Botón de página anterior
-        const prevButton = document.createElement('button');
-        prevButton.id = 'anterior';
-        prevButton.className = 'btn btn-primary';
-        prevButton.innerHTML = '<i class="fa-solid fa-chevron-left"></i>';
-        prevButton.disabled = currentPage === 1;
-        prevButton.addEventListener('click', () => {
-            if (currentPage > 1) {
-                currentPage--;
-                displayRows(currentPage, rows);
-                updatePaginationControls(); // Actualizar controles de paginación
-            }
-        });
-        paginationControls.appendChild(prevButton);
-
-        // Botones de páginas
-        for (let i = 1; i <= totalPages; i++) {
-            const pageButton = document.createElement('button');
-            pageButton.className = 'btn';
-            pageButton.textContent = i;
-            pageButton.addEventListener('click', () => {
-                currentPage = i;
-                displayRows(currentPage, rows);
-                updatePaginationControls(); // Actualizar controles de paginación
-            });
-            pageNumbersContainer.appendChild(pageButton);
-        }
-
-        paginationControls.appendChild(pageNumbersContainer);
-
-        // Botón de página siguiente
-        const nextButton = document.createElement('button');
-        nextButton.id = 'siguiente';
-        nextButton.className = 'btn btn-primary';
-        nextButton.innerHTML = '<i class="fa-solid fa-chevron-right"></i>';
-        nextButton.disabled = currentPage === totalPages;
-        nextButton.addEventListener('click', () => {
-            if (currentPage < totalPages) {
-                currentPage++;
-                displayRows(currentPage, rows);
-                updatePaginationControls(); // Actualizar controles de paginación
-            }
-        });
-        paginationControls.appendChild(nextButton);
-
-        // Resaltar el botón de página actual
-        updatePaginationControls();
-    }
-
-    function updatePaginationControls() {
-        const pageButtons = paginationControls.querySelectorAll('#page-numbers button');
-        pageButtons.forEach((button, index) => {
-            button.classList.toggle('active', index + 1 === currentPage);
-        });
-
-        const prevButton = paginationControls.querySelector('#anterior');
-        const nextButton = paginationControls.querySelector('#siguiente');
-
-        prevButton.disabled = currentPage === 1;
-        nextButton.disabled = currentPage === pageButtons.length;
-    }
-
-    function displayRows(page, rows) {
-        const tbody = table.querySelector('tbody');
-        tbody.innerHTML = ''; // Limpiar el cuerpo de la tabla
-
-        const start = (page - 1) * rowsPerPage;
-        const end = start + rowsPerPage;
-        const paginatedRows = rows.slice(start, end);
-
-        paginatedRows.forEach(row => tbody.appendChild(row));
-    }
-
-    // Inicializar la tabla con todas las filas
-    function initializeTable() {
-        const tbody = table.querySelector('tbody');
-        rows = Array.from(tbody.querySelectorAll('tr')); // Obtener todas las filas
-        updateTable(rows); // Mostrar todas las filas inicialmente
-    }
-
-    initializeTable(); // Inicializar la tabla al cargar la página
+    }    
 
     var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
     tooltipTriggerList.map(function (tooltipTriggerEl) {
