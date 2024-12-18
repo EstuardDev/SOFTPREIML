@@ -2,6 +2,7 @@ import joblib
 import os
 from django.conf import settings
 from datetime import timedelta, datetime
+from django.db.models import Count
 from django.contrib.auth.models import User, Group
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, update_session_auth_hash
@@ -988,47 +989,49 @@ def calcular_tiempo_promedio_deteccion():
     try:
         diagnosticos = Diagnostico.objects.all()
         if not diagnosticos.exists():
-            return {"TPD_formateado": "0d 00h 00m 00s", "TPD_segundos": 0}
+            return {"mensaje": "No hay diagnósticos disponibles", "datos": {}}
         
-        primer_diagnostico = diagnosticos.earliest('fecha_prediccion')
-        fecha_inicio = primer_diagnostico.fecha_prediccion
-        hora_inicio = primer_diagnostico.hora_prediccion
-
-        datetime_inicio = datetime.combine(fecha_inicio, hora_inicio)
-
-        ultimo_diagnostico = diagnosticos.latest('fecha_prediccion')
-        fecha_fin = ultimo_diagnostico.fecha_prediccion
-        hora_fin = ultimo_diagnostico.hora_prediccion
-
-        datetime_fin = datetime.combine(fecha_fin, hora_fin)
-
-        tiempo_total_segundos = (datetime_fin - datetime_inicio).total_seconds()
+        # Agrupar diagnósticos por fecha_prediccion
+        diagnosticos_por_dia = diagnosticos.values('fecha_prediccion').annotate(
+            total_pacientes=Count('paciente', distinct=True)
+        )
         
-        total_pacientes = diagnosticos.values('paciente').distinct().count()   
-        print(f"Total de pacientes únicos: {total_pacientes}")
-
+        resultados = {}
         
-        if total_pacientes == 0:
-            return {"TPD_formateado": "0d 00h 00m 00s", "TPD_segundos": 0}
-        
-        tiempo_promedio_segundos = tiempo_total_segundos / total_pacientes
-        print(f"Tiempo total en segundos: {tiempo_total_segundos}") 
+        for dia in diagnosticos_por_dia:
+            fecha = dia['fecha_prediccion']
+            total_pacientes = dia['total_pacientes']
+            
+            # Obtener todos los diagnósticos de este día
+            diagnosticos_dia = diagnosticos.filter(fecha_prediccion=fecha)
+            
+            if not diagnosticos_dia.exists() or total_pacientes == 0:
+                resultados[fecha] = "0d 00h 00m 00s"
+                continue
+            
+            # Calcular tiempo total para este día
+            primer_diagnostico = diagnosticos_dia.earliest('hora_prediccion')
+            ultimo_diagnostico = diagnosticos_dia.latest('hora_prediccion')
+            
+            datetime_inicio = datetime.combine(fecha, primer_diagnostico.hora_prediccion)
+            datetime_fin = datetime.combine(fecha, ultimo_diagnostico.hora_prediccion)
+            
+            tiempo_total_dia = (datetime_fin - datetime_inicio).total_seconds()
+            tiempo_promedio_dia = tiempo_total_dia / total_pacientes
+            
+            # Convertir tiempo promedio a formato legible
+            tiempo_promedio = timedelta(seconds=tiempo_promedio_dia)
+            dias = tiempo_promedio.days
+            horas, resto = divmod(tiempo_promedio.seconds, 3600)
+            minutos, segundos = divmod(resto, 60)
 
-        tiempo_promedio = timedelta(seconds=tiempo_promedio_segundos)
-        dias = tiempo_promedio.days
-        horas, resto = divmod(tiempo_promedio.seconds, 3600)
-        minutos, segundos = divmod(resto, 60)
-
-        tiempo_formateado = f"{dias}d {horas:02}h {minutos:02}m {segundos:02}s"
-        print('Tiempo Formateado: ', tiempo_formateado)
+            tiempo_formateado = f"{dias}d {horas:02}h {minutos:02}m {segundos:02}s"
+            resultados[fecha] = tiempo_formateado
         
-        return {
-            "TPD_formateado": tiempo_formateado,
-            "TPD_segundos": round(tiempo_promedio_segundos)
-        }
+        return {"mensaje": "Cálculo realizado con éxito", "datos": resultados}
     except Exception as e:
-        print(f"Error al calcular el tiempo promedio de detección: {e}")
-        return {"TPD_formateado": "0d 00h 00m 00s", "TPD_segundos": 0}
+        print(f"Error al calcular el tiempo promedio por día: {e}")
+        return {"mensaje": "Error en el cálculo", "datos": {}}
 
 # 2. Cálculo de la Proporción de Riesgo (PR)
 def calcular_proporcion_riesgo():
