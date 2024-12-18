@@ -17,7 +17,10 @@ from .models import Diagnostico
 # -------------------- VISTAS PARA LOGIN --------------------
 
 def reportesviews(request):
-    reportes = Diagnostico.objects.all()[:10] 
+    # Obtener los últimos 15 reportes ordenados por el ID de manera descendente
+    reportes = Diagnostico.objects.all().order_by('-fecha_prediccion')[:15]
+    
+    # Formatear los tiempos de detección
     for reporte in reportes:
         reporte.tiempo_deteccion_formateado = calcular_tiempo_deteccion(reporte)
         
@@ -26,6 +29,7 @@ def reportesviews(request):
     }
     
     return render(request, 'reportes.html', contexto)
+
     
 def loginviews(request):
     if request.method == 'POST':
