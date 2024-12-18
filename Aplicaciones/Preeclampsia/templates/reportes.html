@@ -22,29 +22,54 @@
                             </tr>
                         </thead>
                         <tbody>
-                            {% for r in reportes %}
-                                <tr>
-                                    <td>{{ forloop.counter }}</td>
-                                    <td>{{ r.personal.nombre }} {{ r.personal.apellidos }}</td>
-                                    <td>{{ r.paciente.nombre }} {{ r.paciente.apellidos }}</td>
-                                    <td>{{ r.fecha_prediccion|date:"d-m-Y" }}</td>
-                                    <td>
-                                        {% if r.nivelriesgo == 'No Preeclampsia' %}
-                                            <span class="badge bg-success">{{ r.nivelriesgo }}</span>
-                                        {% elif r.nivelriesgo == 'Preeclampsia' %}
-                                            <span class="badge bg-info">{{ r.nivelriesgo }}</span>
-                                        {% elif r.nivelriesgo == 'Leve' %}
-                                            <span class="badge bg-warning">{{ r.nivelriesgo }}</span>
-                                        {% elif r.nivelriesgo == 'Severa' %}
-                                            <span class="badge bg-danger">{{ r.nivelriesgo }}</span>
-                                        {% endif %}
-                                    </td>
-                                    <td>{{ r.tiempo_deteccion_formateado }}</td>
-                                </tr>
+                            {% if request.user.is_superuser %}
+                            {% for r in reportes%}
+                            <tr>
+                                <td>{{ forloop.counter }}</td>
+                                <td>{{ r.personal }}</td>
+                                <td>{{ r.paciente }}</td>
+                                <td>{{ r.fecha_prediccion|date:"d-m-Y" }}</td>
+                                <td>
+                                    {% if r.nivelriesgo == 'No Preeclampsia' %}
+                                    <span class="badge bg-success">{{ r.nivelriesgo }}</span>
+                                    {% elif r.nivelriesgo == 'Preeclampsia' %}
+                                    <span class="badge bg-info">{{ r.nivelriesgo }}</span>
+                                    {% elif r.nivelriesgo == 'Leve' %}
+                                    <span class="badge bg-warning">{{ r.nivelriesgo }}</span>
+                                    {% elif r.nivelriesgo == 'Severa' %}
+                                    <span class="badge bg-danger">{{ r.nivelriesgo }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ r.tiempo_deteccion_formateado }}</td>
+                            </tr>
                             {% endfor %}
-                        </tbody>
+                            {% else %}
+                            <!-- Si el usuario es médico, muestra solo sus reportes -->
+                            {% for r in reportes %}
+                            {% if r.paciente.personal == request.user.personal %}
+                            <tr>
+                                <td>{{ forloop.counter }}</td>
+                                <td>{{ r.personal }}</td>
+                                <td>{{ r.paciente }}</td>
+                                <td>{{ r.fecha_prediccion|date:"d-m-Y" }}</td>
+                                <td>
+                                    {% if r.nivelriesgo == 'No Preeclampsia' %}
+                                    <span class="badge bg-success">{{ r.nivelriesgo }}</span>
+                                    {% elif r.nivelriesgo == 'Preeclampsia' %}
+                                    <span class="badge bg-info">Posible desarrollo de preeclampsia</span>
+                                    {% elif r.nivelriesgo == 'Leve' %}
+                                    <span class="badge bg-warning">Riesgo Leve</span>
+                                    {% elif r.nivelriesgo == 'Severa' %}
+                                    <span class="badge bg-danger">Riesgo Severo</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ r.tiempo_deteccion_formateado }}</td>
+                            </tr>
+                            {% endif %}
+                            {% endfor %}
+                            {% endif %}
+                        </tbody>    
                     </table>
-                    
                 </div>
             </section>
         </div>
