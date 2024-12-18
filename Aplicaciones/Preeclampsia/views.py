@@ -17,7 +17,14 @@ from .models import Diagnostico
 # -------------------- VISTAS PARA LOGIN --------------------
 
 def reportesviews(request):
-    reportes = Diagnostico.objects.all()
+    # Si el usuario es superusuario, obtén todos los reportes
+    if request.user.is_superuser:
+        reportes = Diagnostico.objects.all()
+    else:
+        # Si el usuario es médico, solo obtener los reportes de su personal
+        reportes = Diagnostico.objects.filter(paciente__personal=request.user.personal)
+    
+    # Formatear el tiempo de detección para cada reporte
     for reporte in reportes:
         reporte.tiempo_deteccion_formateado = calcular_tiempo_deteccion(reporte)
         
@@ -26,6 +33,7 @@ def reportesviews(request):
     }
     
     return render(request, 'reportes.html', contexto)
+
     
 def loginviews(request):
     if request.method == 'POST':
