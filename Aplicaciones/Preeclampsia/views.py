@@ -989,14 +989,15 @@ def calcular_tiempo_promedio_deteccion():
     try:
         diagnosticos = Diagnostico.objects.all()
         if not diagnosticos.exists():
-            return {"mensaje": "No hay diagnósticos disponibles", "datos": {}}
+            return {"TPD_formateado": "0d 00h 00m 00s", "TPD_segundos": 0}
         
         # Agrupar diagnósticos por fecha_prediccion
         diagnosticos_por_dia = diagnosticos.values('fecha_prediccion').annotate(
             total_pacientes=Count('paciente', distinct=True)
         )
         
-        resultados = {}
+        tiempo_total_diario = timedelta(0)
+        total_dias = 0
         
         for dia in diagnosticos_por_dia:
             fecha = dia['fecha_prediccion']
@@ -1006,7 +1007,6 @@ def calcular_tiempo_promedio_deteccion():
             diagnosticos_dia = diagnosticos.filter(fecha_prediccion=fecha)
             
             if not diagnosticos_dia.exists() or total_pacientes == 0:
-                resultados[fecha] = "0d 00h 00m 00s"
                 continue
             
             # Calcular tiempo total para este día
@@ -1019,19 +1019,27 @@ def calcular_tiempo_promedio_deteccion():
             tiempo_total_dia = (datetime_fin - datetime_inicio).total_seconds()
             tiempo_promedio_dia = tiempo_total_dia / total_pacientes
             
-            # Convertir tiempo promedio a formato legible
-            tiempo_promedio = timedelta(seconds=tiempo_promedio_dia)
-            dias = tiempo_promedio.days
-            horas, resto = divmod(tiempo_promedio.seconds, 3600)
-            minutos, segundos = divmod(resto, 60)
+            tiempo_total_diario += timedelta(seconds=tiempo_promedio_dia)
+            total_dias += 1
 
-            tiempo_formateado = f"{dias}d {horas:02}h {minutos:02}m {segundos:02}s"
-            resultados[fecha] = tiempo_formateado
+        # Calcular el promedio global por día
+        if total_dias == 0:
+            return {"TPD_formateado": "0d 00h 00m 00s", "TPD_segundos": 0}
         
-        return {"mensaje": "Cálculo realizado con éxito", "datos": resultados}
+        tiempo_promedio_global = tiempo_total_diario / total_dias
+        dias = tiempo_promedio_global.days
+        horas, resto = divmod(tiempo_promedio_global.seconds, 3600)
+        minutos, segundos = divmod(resto, 60)
+
+        tiempo_formateado = f"{dias}d {horas:02}h {minutos:02}m {segundos:02}s"
+        
+        return {
+            "TPD_formateado": tiempo_formateado,
+            "TPD_segundos": round(tiempo_promedio_global.total_seconds())
+        }
     except Exception as e:
-        print(f"Error al calcular el tiempo promedio por día: {e}")
-        return {"mensaje": "Error en el cálculo", "datos": {}}
+        print(f"Error al calcular el tiempo promedio de detección por día: {e}")
+        return {"TPD_formateado": "0d 00h 00m 00s", "TPD_segundos": 0}
 
 # 2. Cálculo de la Proporción de Riesgo (PR)
 def calcular_proporcion_riesgo():
