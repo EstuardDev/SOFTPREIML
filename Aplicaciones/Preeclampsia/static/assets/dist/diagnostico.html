@@ -1,0 +1,813 @@
+{% extends "./sidebar.html" %}
+
+{% block title %} Diagnóstico {% endblock %}
+
+{%block body%}
+{% load static %}
+<div class="content">
+
+    <section class="content-header">
+        <div class="filters">
+            <div class="row align-items-center">
+                <div class="col-sm-12 col-md-12 col-lg-12 col-xl-12">
+                    <h1>Diagnóstico de Pacientes</h1>
+                    <hr>
+                    <div class="row align-items-center">
+                        <div class="col-sm-12 col-md-3 col-lg-3 col-xl-3">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control" id="filtroPacienteNombre"
+                                    placeholder="Filtrar por nombre de paciente" minlength="8" maxlength="8">
+                                <label for="filtroPacienteNombre">Filtrar por Nombre</label>
+                            </div>
+                        </div>
+                        <div class="col-sm-12 col-md-3 col-lg-3 col-xl-3">
+                            <div class="form-floating mb-3">
+                                <select class="form-select" id="filtroRiesgo" aria-label="Estado">
+                                    <option value="">Seleccione el riesgo</option>
+                                    <option value="No Preeclampsia">No Preeclampsia</option>
+                                    <option value="Posible desarrollo de preeclampsia">Posible desarrollo de preeclampsia</option>
+                                    <option value="Riesgo Leve">Riesgo Leve</option>
+                                    <option value="Riesgo Severo">Riesgo Severo</option>
+                                </select>
+                                <label for="filtroRiesgo">Riesgo</label>
+                            </div>
+                        </div>
+                        <div class="col-sm-12 col-md-3 col-lg-3 col-xl-3">
+                            <div class="form-floating mb-3">
+                                <input type="date" class="form-control" id="filtroFecha"
+                                    placeholder="Filtrar por fecha">
+                                <label for="filtroFecha">Filtrar por fecha</label>
+                            </div>
+                        </div>
+                        {% if request.user.is_superuser %}
+                        <div class="col-auto">
+                            <button type="button" class="btn btn-primary" data-bs-toggle="modal"
+                                data-bs-target="#exampleModal" disabled>
+                                Evaluar Paciente
+                            </button>
+                        </div>
+                        {% else %}
+                        <div class="col-auto">
+                            <button type="button" class="btn btn-primary" data-bs-toggle="modal"
+                                data-bs-target="#exampleModal">
+                                Evaluar Paciente
+                            </button>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Modal -->
+    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Evaluar Paciente</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="form-diagnostico" action="{% url 'guardarDiagnostico' %}" method="POST"> {% csrf_token %}
+
+                        <!-- Section 1: Datos Iniciales del Paciente -->
+                        <div class="card mb-1">
+                            <div class="card-header">
+                                <h3>Datos Iniciales del Paciente</h3>
+                            </div>
+                            <div class="bloque1">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-floating mb-3">
+                                            <div class="input-group">
+                                                <div class="form-floating">
+                                                    <input type="text" class="form-control" id="txtdni" name="txtdni"
+                                                        placeholder="dni" minlength="8" maxlength="8" required>
+                                                    <label id="txtdni" for="txtdni">Ingresar DNI</label>
+                                                </div>
+                                                <button id="btnBuscarHistorialP" type="button" class="btn btn-primary">
+                                                    <i class="fa-solid fa-magnifying-glass"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div class="form-floating mb-3">
+                                            <input type="text" class="form-control" id="txtnombre" name="txtnombre"
+                                                placeholder="ingresar Nombres" readonly>
+                                            <label for="txtnombre">Nombres</label>
+                                        </div>
+                                        <div class="form-floating mb-3">
+                                            <input type="text" class="form-control" id="txtapellido" name="txtapellido"
+                                                placeholder="Ingresar Apellidos" readonly>
+                                            <label for="txtapellido">Apellidos</label>
+                                        </div>
+                                        <div class="form-floating mb-3">
+                                            <input type="text" class="form-control" id="txtedad" name="txtedad"
+                                                placeholder="Edad Paciente" readonly>
+                                            <label for="txtedad">ingresar Edad</label>
+                                        </div>
+
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-floating mb-3">
+                                            <input type="text" class="form-control" id="txtedadgestacional"
+                                                name="txtedadgestacional" placeholder="Ingresar Edad Gestacional"
+                                                readonly>
+                                            <label for="txtedadgestacional">Edad Gestacional</label>
+                                        </div>
+                                        <!-- <div class="form-floating mb-3">
+                                            <input type="text" class="form-control" id="txtperiodointerg"
+                                                name="txtperiodointerg" placeholder="Periodo intergenésico">
+                                            <label for="txtperiodointerg">Periodo intergenésico</label>
+                                        </div> -->
+                                        <div class="form-floating mb-3">
+                                            <select class="form-select" id="txtperiodointerg" name="txtperiodointerg"
+                                                aria-label="Floating label select example" required>
+                                                <option selected>Seleccione</option>
+                                                <option value="0">Primigesta (Gestante Primeriza)</option>
+                                                <option value="1">1 Año</option>
+                                                <option value="2">2 Años</option>
+                                                <option value="3">3 Años</option>
+                                                <option value="4">4 Años</option>
+                                                <option value="5">5 Años</option>
+                                                <option value="6">>6 Años</option>
+                                            </select>
+                                            <label for="txtperiodointerg">Periodo intergenésico (Años)</label>
+                                        </div>
+                                        <div class="form-floating mb-3">
+                                            <select class="form-select" id="txtembarazonuevapareja"
+                                                name="txtembarazonuevapareja"
+                                                aria-label="Floating label select example">
+                                                <option selected>Seleccione</option>
+                                                <option>SI</option>
+                                                <option>NO</option>
+                                            </select>
+                                            <label for="txtembarazonuevapareja">Embarazo Nueva Pareja</label>
+                                        </div>
+                                        <div class="form-floating mb-3">
+                                            <select class="form-select" id="txthipertCronica" name="txthipertCronica"
+                                                aria-label="Floating label select example">
+                                                <option selected>Seleccione</option>
+                                                <option>SI</option>
+                                                <option>NO</option>
+                                            </select>
+                                            <label for="txthipertCronica">Hipertensión Crónica preexistente</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Section 2: parámetros clínicos -->
+                        <div class="card mb-1">
+                            <div class="card-header">
+                                <h3>Parámetros clínicos</h3>
+                            </div>
+                            <div class="bloque2">
+                                <div class="row">
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <div class="input-group mb-3">
+                                                <div class="form-floating">
+                                                    <input type="text" class="form-control" id="txtsistolicabasal"
+                                                        name="txtsistolicabasal" placeholder="PA. Diastólica Basal">
+                                                    <label for="txtsistolicabasal">Presión Arterial Sistólica
+                                                        Basal</label>
+                                                </div>
+                                                <span class="input-group-text">mmHg
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="input-group mb-3">
+                                                <div class="form-floating">
+                                                    <input type="text" class="form-control" id="txtdiastolicabasal"
+                                                        name="txtdiastolicabasal" placeholder="PA. Diastólica Basal">
+                                                    <label for="txtdiastolicabasal">Presión Arterial Diastólica
+                                                        Basal</label>
+                                                </div>
+                                                <span class="input-group-text">mmHg
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4"></div>
+                                    </div>
+                                    <hr>
+                                    <!-- <h3>Primera Medición Actual</h3> -->
+                                    <strong>Primera Medición Actual</strong>
+                                    <div class="row mb-3">
+                                        <div class="col-md-4">
+                                            <div class="input-group">
+                                                <div class="form-floating">
+                                                    <input type="text" class="form-control" id="txtsistolicaM1"
+                                                        name="txtsistolicaM1" placeholder="PA. Sistólica1">
+                                                    <label for="txtsistolicaM1">Presión Arterial Sistólica</label>
+                                                </div>
+                                                <span class="input-group-text">mmHg
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="input-group">
+                                                <div class="form-floating">
+                                                    <input type="text" class="form-control" id="txtdiastolicaM1"
+                                                        name="txtdiastolicaM1" placeholder="PA. Diastólica1">
+                                                    <label for="txtdiastolicaM1">Presión Arterial Diastólica</label>
+                                                </div>
+                                                <span class="input-group-text">mmHg
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4"></div>
+                                    </div>
+                                    <!-- <h3>Segunda Medición Actual</h3> -->
+                                    <strong>Segunda Medición Actual</strong>
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <div class="input-group">
+                                                <div class="form-floating">
+                                                    <input type="text" class="form-control" id="txtsistolicaM2"
+                                                        name="txtsistolicaM2" placeholder="PA. Sistólica2">
+                                                    <label for="txtsistolicaM2">Presión Arterial Sistólica</label>
+                                                </div>
+                                                <span class="input-group-text">mmHg
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="input-group">
+                                                <div class="form-floating">
+                                                    <input type="text" class="form-control" id="txtdiastolicaM2"
+                                                        name="txtdiastolicaM2" placeholder="PA. Diastólica2">
+                                                    <label for="txtdiastolicaM2">Presión Arterial Diastólica</label>
+                                                </div>
+                                                <span class="input-group-text">mmHg
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4"></div>
+                                    </div>
+                                    <hr>
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <div class="form-floating mb-3">
+                                                <select class="form-select" id="txttestdeass" name="txttestdeass"
+                                                    aria-label="Floating label select example">
+                                                    <option selected>Seleccione</option>
+                                                    <option value="0.00">Negativo</option>
+                                                    <option value="0.50">Trazadas</option>
+                                                    <option value="1.00">1</option>
+                                                    <option value="2.00">2</option>
+                                                    <option value="3.00">3</option>
+                                                </select>
+                                                <label for="txttestdeass">Test de ASS (+)</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="input-group mb-3">
+                                                <div class="form-floating">
+                                                    <input type="text" class="form-control" id="txtproteinuria"
+                                                        name="txtproteinuria" placeholder="dni">
+                                                    <label for="txtproteinuria">Proteina en Orina - 24 horas </label>
+                                                </div>
+                                                <span class="input-group-text">mg/dL
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Section 3: Laboratorio -->
+                        <div class="card mb-2">
+                            <div class="card-header">
+                                <h3>Laboratorio</h3>
+                            </div>
+                            <div class="bloque3">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="input-group">
+                                            <div class="form-floating">
+                                                <input type="text" class="form-control" id="txttgo" name="txttgo"
+                                                    placeholder="TGO">
+                                                <label for="txttgo">TGO</label>
+                                            </div>
+                                            <span class="input-group-text">U/L
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="input-group">
+                                            <div class="form-floating">
+                                                <input type="text" class="form-control" id="txttgp" name="txttgp"
+                                                    placeholder="TGP">
+                                                <label for="txttgp">TGP</label>
+                                            </div>
+                                            <span class="input-group-text">U/L
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="input-group">
+                                            <div class="form-floating">
+                                                <input type="text" class="form-control" id="txtcreatinina"
+                                                    name="txtcreatinina" placeholder="dni">
+                                                <label for="txtcreatinina">Creatinina</label>
+                                            </div>
+                                            <span class="input-group-text">mg/dL
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="input-group">
+                                            <div class="form-floating">
+                                                <input type="text" class="form-control" id="txturea" name="txturea"
+                                                    placeholder="dni">
+                                                <label for="txturea">UREA</label>
+                                            </div>
+                                            <span class="input-group-text">mg/dL
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="input-group">
+                                            <div class="form-floating">
+                                                <input type="text" class="form-control" id="txtfibrinogeno"
+                                                    name="txtfibrinogeno" placeholder="dni">
+                                                <label for="txtfibrinogeno">Fibrinógeno</label>
+                                            </div>
+                                            <span class="input-group-text">mg/dL
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4"></div>
+                                </div>
+                                <!-- <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="input-group">
+                                            <div class="form-floating">
+                                                <input type="text" class="form-control" id="txttiempoprotrombina"
+                                                    name="txttiempoprotrombina" placeholder="dni">
+                                                <label for="txttiempoprotrombina">Tiempo de Protrombina</label>
+                                            </div>
+                                            <span class="input-group-text">Seg
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="input-group">
+                                            <div class="form-floating">
+                                                <input type="text" class="form-control" id="txtparcialtromboplastina"
+                                                    name="txtparcialtromboplastina" placeholder="dni">
+                                                <label for="txtparcialtromboplastina">Tiempo Parcial de
+                                                    Tromboplastina</label>
+                                            </div>
+                                            <span class="input-group-text">Seg
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4"></div>
+                                </div> -->
+                            </div>
+                        </div>
+
+                        <div class="row botones">
+                            <div class="form-floating">
+                                <button type="submit" class="btn btn-primary text-while">
+                                    Evaluar
+                                </button>
+                                <button type="submit" class="btn btn-danger text-while btnLimpiar">
+                                    Limpiar
+                                </button>
+                            </div>
+                        </div>
+
+                    </form>
+                    <!-- <form id="form-diagnostico" action="{% url 'guardarDiagnostico' %}" method="post">
+                        {% csrf_token %}
+                        <div class="form-floating mb-3">
+                            <div class="input-group mb-3">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control" id="txtdni" name="txtdni" placeholder="dni"
+                                        minlength="8" maxlength="8">
+                                    <label id="txtdni" for="txtdni">Ingresar DNI</label>
+                                </div>
+                                <button id="btnBuscarHistorialP" type="button" class="btn btn-primary">
+                                    <i class="fa-solid fa-magnifying-glass"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" id="txtnombre" placeholder="ingresar Nombres"
+                                readonly />
+                            <label for="txtnombre">Nombres</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" id="txtapellido" placeholder="Ingresar Apellidos"
+                                readonly />
+                            <label for="txtapellido">Apellidos</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <div class="row g-2">
+                                <div class="col-md">
+                                    <div class="form-floating">
+                                        <input type="text" class="form-control" id="txtsistolica" name="txtsistolica"
+                                            placeholder="Sistólica" />
+                                        <label for="txtsistolica">Presión Sistólica</label>
+                                    </div>
+                                </div>
+                                <div class="col-md">
+                                    <div class="form-floating">
+                                        <input type="text" class="form-control" id="txtdiastolica" name="txtdiastolica"
+                                            placeholder="Diastólica" />
+                                        <label for="txtdiastolica">Presión Diastólica</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" id="txtproteinuria" name="txtproteinuria"
+                                placeholder="Índice de Masa Corporal" />
+                            <label for="txtproteinuria">Proteinuria en g/24 horas</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <select class="form-select" id="txthistorialf" name="txthistorialf"
+                                aria-label="Floating label select example">
+                                <option selected>Seleccione</option>
+                                <option>SI</option>
+                                <option>NO</option>
+                            </select>
+                            <label for="txthistorialf">Historial Familiar</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <select class="form-select" id="txtdiabetes" name="txtdiabetes"
+                                aria-label="Floating label select example">
+                                <option selected>Seleccione</option>
+                                <option>SI</option>
+                                <option>NO</option>
+                            </select>
+                            <label for="txtdiabetes">Diabetes Gestacional</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" id="txtimc" name="txtimc"
+                                placeholder="Índice de Masa Corporal" />
+                            <label for="txtimc">Índice de Masa Corporal</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <select class="form-select" id="txttestdeas" name="txttestdeas"
+                                aria-label="Floating label select example">
+                                <option selected>Seleccione</option>
+                                <option>SI</option>
+                                <option>NO</option>
+                            </select>
+                            <label for="txttestdeas">Test de As</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" id="txtcreatinina" name="txtcreatinina"
+                                placeholder="Creatinina" />
+                            <label for="txtcreatinina">Creatinina</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <button type="submit" class="btn btn-primary text-while">
+                                Evaluar
+                            </button>
+                            <button type="submit" class="btn btn-danger text-while btnLimpiar">
+                                Limpiar
+                            </button>
+                        </div>
+                    </form> -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para editar Diagnostico -->
+    <div class="modal fade" id="editModalD" tabindex="-1" aria-labelledby="editModalDLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editModalDLabel">Editar Diagnóstico</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="form-Ediagnostico" action="{% url 'editarDiagnostico' %}" method="POST"> {% csrf_token %}
+                        <div class="card mb-4">
+                            <div hidden="" class="form-floating mb-3">
+                                <input type="text" class="form-control" id="txteditid" name="txteditid"
+                                    value="{{diagnostico.id}}" readonly />
+                            </div>
+                            <div class="card-header">
+                                <h3>Diagnóstico del Paciente</h3>
+                            </div>
+                            <div class="bloque1">
+                                <div class="row">
+                                    <h3>Datos del Médico</h3>
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <div class="form-floating mb-3">
+                                                <input type="text" class="form-control" id="txteditnombresmedico"
+                                                    name="txteditnombresmedico" value="{{diagnostico.personal}}"
+                                                    placeholder="Ingresar Paciente" readonly />
+                                                <label for="txteditnombresmedico">Nombre Médico</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <hr>
+                                    <h3>Datos del Paciente</h3>
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <div class="form-floating mb-3">
+                                                <input type="text" class="form-control" id="txteditnombrespaciente"
+                                                    name="txteditnombrespaciente" value="{{diagnostico.paciente}}"
+                                                    placeholder="Ingresar Paciente" readonly />
+                                                <label for="txteditnombrespaciente">Nombres Paciente</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <div class="form-floating mb-3">
+                                                <input type="date" class="form-control" id="txteditfechadiagnostico"
+                                                    name="txteditfechadiagnostico"
+                                                    value="{{diagnostico.fecha_prediccion}}"
+                                                    placeholder="Ingresar Fecha" step="1">
+                                                <label for="txteditfechadiagnostico">Fecha Diagnostico</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-floating mb-3">
+                                            <input type="time" class="form-control" id="txtedithoradiagnostico"
+                                                name="txtedithoradiagnostico" value="{{diagnostico.hora_prediccion}}"
+                                                step="1" placeholder="Hora">
+                                            <label for="txtedithoradiagnostico">Hora</label>
+                                        </div>
+
+
+                                        <div class="form-floating mb-3">
+                                            <input type="text" class="form-control" id="txteditriesgo"
+                                                name="txteditriesgo" value="{{diagnostico.riesgo}}"
+                                                placeholder="Periodo intergenésico" readonly>
+                                            <label for="txteditriesgo">Valor de Riesgo</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-floating mb-3">
+                                            <input type="text" class="form-control" id="txteditestado"
+                                                name="txteditestado" value="{{diagnostico.estado}}"
+                                                placeholder="Ingresar Estado" readonly>
+                                            <label for="txteditestado">Estado</label>
+                                        </div>
+                                        <div class="form-floating mb-3">
+                                            <input type="text" class="form-control" id="txteditnivelriesgo"
+                                                name="txteditnivelriesgo" value="{{diagnostico.nivelriesgo}}"
+                                                placeholder="Periodo intergenésico" readonly>
+                                            <label for="txteditnivelriesgo">Nivel de Riesgo</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-12">
+                                        <!-- <textarea class="col-12" name="textarea" id="textarea"></textarea> -->
+
+                                        <div class="form-floating">
+                                            <textarea class="form-control" id="txteditdetalles" name="txteditdetalles"
+                                                value="{{diagnostico.detalles}}" placeholder="Leave a comment here"
+                                                style="height: 100px">
+                                            </textarea>
+                                            <label for="txteditdetalles">Detalles u Observación</label>
+                                        </div>
+
+                                        <!-- <div class="form-floating mb-3">
+                                            <input type="text" class="form-control" id="txteditdetalles"
+                                                name="txteditdetalles" value="{{diagnostico.detalles}}"
+                                                placeholder="Ingresar Detalles">
+                                            <label for="txteditdetalles">Detalles u Observación</label>
+                                        </div> -->
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+
+
+                        <div class="form-floating mb-3">
+                            <button type="submit" id="btnGuardarCambios" class="btn btn-primary text-while">
+                                Guardar
+                            </button>
+                            <button type="submit" class="btn btn-danger text-while btnLimpiar">
+                                Limpiar
+                            </button>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para ver los diagnosticos del paciente -->
+    <div class="modal fade" id="histEvaluacionPacienteModal" tabindex="-1"
+        aria-labelledby="histEvaluacionPacienteModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="evaluacionModalLabel">Diagnosticos del Paciente</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-subtitle">
+                    <h1 id="nombre-paciente"></h1>
+                </div>
+
+                <div class="modal-body">
+                    <div class="table-responsive">
+                        <table id="tablaVisualizarDpac" class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th style="text-align: center; vertical-align: middle">#</th>
+                                    <th style="text-align: center; vertical-align: middle">FECHA PREDICCION</th>
+                                    <th style="text-align: center; vertical-align: middle">RIESGO </th>
+                                    <th style="text-align: center; vertical-align: middle">NIVEL RIESGO</th>
+                                    <th style="text-align: center; vertical-align: middle">ESTADO</th>
+                                    <th style="text-align: center; vertical-align: middle">DETALLES</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-1">
+        <select id="rows-per-page" class="form-select">
+            <option value="5" selected>5</option>
+            <option value="10">10</option>
+            <option value="15">15</option>
+            <option value="20">20</option>
+        </select>
+    </div>
+
+    <!-- Tabla responsive -->
+    <div class="table-responsive">
+        <table id="tablaDiagnostico" class="table table-striped table-md">
+            <thead>
+                {% if request.user.is_superuser %}
+                <tr>
+                    <th>#</th>
+                    <!-- <th>ID</th> -->
+                    <th>PACIENTE</th>
+                    <!-- <th>HISTORIAL</th> -->
+                    <th>MEDICO</th>
+                    <th>F. REGISTRO</th>
+                    <th>PAM (mmHg)</th>
+                    <th>POSIBILIDAD DE RIESGO</th>
+                    <th>DETALLES</th>
+                    <th>ESTADO</th>
+                    <th colspan="3">ACCIONES</th>
+                </tr>
+                {% else %}
+                <tr>
+                    <th>#</th>
+                    <!-- <th>ID</th> -->
+                    <th>PACIENTE</th>
+                    <!-- <th>HISTORIAL</th> -->
+                    <!-- <th>MEDICO</th> -->
+                    <th>F. REGISTRO</th>
+                    <th>PAM (mmHg)</th>
+                    <th>RIESGO</th>
+                    <th>DETALLES</th>
+                    <th>ESTADO</th>
+                    <th colspan="3">ACCIONES</th>
+                </tr>
+                {% endif %}
+            </thead>
+            <tbody>
+                <!-- Aquí mostramos los datos de los emdicos -->
+                {% if request.user.is_superuser %}
+                {% for dg in diagnostico %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <!-- <td>{{ dg.id }}</td> -->
+                    <td style="text-align: left;">{{ dg.paciente }}</td>
+                    <!-- <td>{{ dg.historia_clinica.paciente.numeroHistoriaClinica }}</td> -->
+                    <td>{{ dg.personal }}</td>
+                    <td>{{ dg.fecha_prediccion|date:"d-m-Y" }}</td>
+                    <td>{{ dg.riesgo }}</td>
+                    <td>
+                        {% if dg.nivelriesgo == 'No Preeclampsia' %}
+                        <span class="badge bg-success">{{ dg.nivelriesgo }}</span>
+                        {% elif dg.nivelriesgo == 'Preeclampsia' %}
+                        <span class="badge bg-info">Posible desarrollo de preeclampsia</span>
+                        <!-- Posible desarrollo de preeclampsia -->
+                        {% elif dg.nivelriesgo == 'Leve' %}
+                        <span class="badge bg-warning">Riesgo Leve</span>
+                        {% elif dg.nivelriesgo == 'Severa' %}
+                        <span class="badge bg-danger">Riesgo Severo</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ dg.detalles }}</td>
+                    <td>
+                        {% if dg.estado == 'Evaluado' %}
+                        <span class="badge bg-success">Evaluado</span>
+                        {% else %}
+                        <span class="badge bg-info">Proceso</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="{% url 'diagnosticosPaciente' dg.paciente.id %}" data-id="{{ dg.paciente.id }}"
+                            class="btn btn-outline-info btnVisualizar" data-bs-toggle="modal"
+                            data-bs-target="#histEvaluacionPacienteModal">
+                            <i class="fa-solid fa-eye"></i>
+                        </a>
+
+                        {% if dg.estado == "Evaluado" %}
+                        <a href="{% url 'edicionDiagnostico' dg.id %}" data-id="{{ dg.id }}"
+                            class="btn btn-outline-primary btnEditar" data-bs-toggle="modal"
+                            data-bs-target="#editModalD">
+                            <i class="fa-solid fa-pen-to-square"></i>
+                        </a>
+                        {% else %}
+                        <a href="{% url 'activarDiagnostico' dg.id %}" class="btn btn-outline-success btnActivar">
+                            <i class="fa-solid fa-circle-check"></i>
+                        </a>
+                        {% endif %}
+
+                        <a href="{% url 'eliminarDiagnostico' dg.id %}" class="btn btn-outline-danger btnEliminar">
+                            <i class="fa-solid fa-prescription-bottle-medical"></i>
+                        </a>
+
+                    </td>
+                    <!-- resto de los datos -->
+                </tr>
+                {% endfor %}
+                {% else %}
+                {% for dg in diagnostico %}
+                {% if dg.paciente.personal == user.personal %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td style="text-align: left;">{{ dg.paciente }}</td>
+                    <!-- <td>{{ dg.historia_clinica.paciente.numeroHistoriaClinica }}</td> -->
+                    <!-- <td>{{ dg.personal }}</td> -->
+                    <td>{{ dg.fecha_prediccion|date:"d-m-Y" }}</td>
+                    <td>{{ dg.riesgo }}</td>
+                    <td>
+                        {% if dg.nivelriesgo == 'No Preeclampsia' %}
+                        <span class="badge bg-success">{{ dg.nivelriesgo }}</span>
+                        {% elif dg.nivelriesgo == 'Preeclampsia' %}
+                        <span class="badge bg-info">Posible desarrollo de preeclampsia</span>
+                        {% elif dg.nivelriesgo == 'Leve' %}
+                        <span class="badge bg-warning">Riesgo Leve</span>
+                        {% elif dg.nivelriesgo == 'Severa' %}
+                        <span class="badge bg-danger">Riesgo Severo</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ dg.detalles }}</td>
+                    <td>
+                        {% if dg.estado == 'Evaluado' %}
+                        <span class="badge bg-success">Evaluado</span>
+                        {% else %}
+                        <span class="badge bg-danger">Proceso</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="{% url 'diagnosticosPaciente' dg.paciente.id %}" data-id="{{ dg.paciente.id }}"
+                            class="btn btn-outline-info btnVisualizar" data-bs-toggle="modal"
+                            data-bs-target="#histEvaluacionPacienteModal">
+                            <i class="fa-solid fa-eye"></i>
+                        </a>
+                        {% if dg.estado == "Evaluado" %}
+                        <a href="{% url 'edicionDiagnostico' dg.id %}" data-id="{{ dg.id }}"
+                            class="btn btn-outline-primary btnEditar" data-bs-toggle="modal"
+                            data-bs-target="#editModalD">
+                            <i class="fa-solid fa-pen-to-square"></i>
+                        </a>
+                        {% else %}
+                        <a href="{% url 'activarDiagnostico' dg.id %}" class="btn btn-outline-success btnActivar">
+                            <i class="fa-solid fa-circle-check"></i>
+                        </a>
+                        {% endif %}
+
+                        <a href="{% url 'eliminarDiagnostico' dg.id %}" class="btn btn-outline-danger btnEliminar">
+                            <i class="fa-solid fa-prescription-bottle-medical"></i>
+                        </a>
+                    </td>
+                </tr>
+                {% endif %}
+                {% endfor %}
+                {% endif %}
+            </tbody>
+        </table>
+    </div>    
+    <div id="pagination-controls">
+        <button id="anterior" class="btn btn-primary"><i class="fa-solid fa-chevron-left"></i></button>
+        <div id="page-numbers"></div>
+        <button id="siguiente" class="btn btn-primary"><i class="fa-solid fa-chevron-right"></i></button>
+    </div>
+</div>
+<!-- Scripts -->
+<script src="{% static 'assets/js/scripts/diagnostico.js' %}"></script>
+{%endblock%}
