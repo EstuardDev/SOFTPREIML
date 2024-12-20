@@ -734,7 +734,7 @@ def guardarDiagnostico(request):
             
             paciente = Paciente.objects.get(dni=dni)  # Asegúrate de que el paciente existe
             historiaclinica = HistoriaClinica.objects.filter(paciente=paciente).latest('fecharegistro')
-            diagnostico = Diagnostico(
+            diagnostico = Diagnostico.objects.create(
                 paciente=paciente,
                 personal=request.user.personal, 
                 historia_clinica=historiaclinica,
