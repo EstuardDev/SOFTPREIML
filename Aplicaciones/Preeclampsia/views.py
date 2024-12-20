@@ -1,6 +1,7 @@
 import joblib
 import os
 from django.conf import settings
+from collections import defaultdict
 from datetime import timedelta, datetime
 from django.db.models import Count
 from django.contrib.auth.models import User, Group
@@ -150,20 +151,21 @@ def inicio(request):
     historias_clinicas = HistoriaClinica.objects.all().count()
     diagnosticos = Diagnostico.objects.order_by('paciente', '-fecha_prediccion').distinct('paciente')[:5]
     
-    # Calcular los indicadores
+     # Calcular los indicadores
     proporcion_riesgo = calcular_proporcion_riesgo().get("PR", 0)
-    tasa_intervencion_efectiva = calcular_intervencion_efectiva().get("TIE", 0)
+    tasa_intervencion_efectiva = calcular_intervencion_efectiva().get("sin_progresion", 0)
+    fecha_ultimo_diagnostico = calcular_intervencion_efectiva().get("fechaTIE", None)
+    casos_cambios_a_riesgo = calcular_cambios_a_riesgo().get("PCR", 0)
     tiempo_promedio_deteccion = calcular_tiempo_promedio_deteccion()
-    casos_severa_a_leve = calcular_casos_severa_a_leve()
     
+    # Contexto
     contexto = {
         'proporcion_riesgo': proporcion_riesgo,
         'tasa_intervencion_efectiva': tasa_intervencion_efectiva,
+        'fecha_intervencion_efectiva': fecha_ultimo_diagnostico,
         'tiempo_promedio_deteccion': tiempo_promedio_deteccion["TPD_formateado"],
         'tiempo_promedio_deteccion_segundos': tiempo_promedio_deteccion["TPD_segundos"],
-        'casos_severa_a_leve': casos_severa_a_leve["casos_severa_a_leve"],
-        'total_pacientes_con_severa': casos_severa_a_leve["total_pacientes_con_severa"],
-        'porcentaje_severa_a_leve': casos_severa_a_leve["porcentaje_severa_a_leve"]
+        'casos_cambios_a_riesgo': casos_cambios_a_riesgo
     }
 
     return render(request, "inicio.html", {"pacientes": pacientes, "medicos": medicos, "historias_clinicas": historias_clinicas, "diagnostico": diagnosticos} | contexto)
@@ -987,8 +989,10 @@ def calcular_tiempo_deteccion(diagnostico):
 # Cálculo del Tiempo Promedio de Detección nivel general(TPD)
 def calcular_tiempo_promedio_deteccion():
     try:
+        # Obtener todos los diagnósticos
         diagnosticos = Diagnostico.objects.all()
         if not diagnosticos.exists():
+            print("No se encontraron diagnósticos.")
             return {"TPD_formateado": "0d 00h 00m 00s", "TPD_segundos": 0}
         
         # Agrupar diagnósticos por fecha_prediccion
@@ -996,48 +1000,66 @@ def calcular_tiempo_promedio_deteccion():
             total_pacientes=Count('paciente', distinct=True)
         )
         
+        # Inicializar variables para el tiempo total y el conteo de días
         tiempo_total_diario = timedelta(0)
         total_dias = 0
         
+        # Iterar sobre los diagnósticos por día
         for dia in diagnosticos_por_dia:
             fecha = dia['fecha_prediccion']
             total_pacientes = dia['total_pacientes']
+            
+            print(f"\nProcesando fecha: {fecha} con {total_pacientes} pacientes")
             
             # Obtener todos los diagnósticos de este día
             diagnosticos_dia = diagnosticos.filter(fecha_prediccion=fecha)
             
             if not diagnosticos_dia.exists() or total_pacientes == 0:
+                print(f"No hay diagnósticos o pacientes para la fecha {fecha}.")
                 continue
             
-            # Calcular tiempo total para este día
+            # Obtener el primer y último diagnóstico de este día
             primer_diagnostico = diagnosticos_dia.earliest('hora_prediccion')
             ultimo_diagnostico = diagnosticos_dia.latest('hora_prediccion')
             
+            # Convertir las horas a datetime para calcular la diferencia
             datetime_inicio = datetime.combine(fecha, primer_diagnostico.hora_prediccion)
             datetime_fin = datetime.combine(fecha, ultimo_diagnostico.hora_prediccion)
             
+            # Calcular el tiempo total del día en segundos
             tiempo_total_dia = (datetime_fin - datetime_inicio).total_seconds()
-            tiempo_promedio_dia = tiempo_total_dia / total_pacientes
+            print(f"Tiempo total del día en segundos: {tiempo_total_dia}")
             
+            # Calcular el tiempo promedio por paciente
+            tiempo_promedio_dia = tiempo_total_dia / total_pacientes
+            print(f"Tiempo promedio por paciente (en segundos): {tiempo_promedio_dia}")
+            
+            # Sumar al tiempo total diario
             tiempo_total_diario += timedelta(seconds=tiempo_promedio_dia)
             total_dias += 1
 
         # Calcular el promedio global por día
         if total_dias == 0:
+            print("No se procesaron días.")
             return {"TPD_formateado": "0d 00h 00m 00s", "TPD_segundos": 0}
         
+        # Calcular el tiempo promedio global
         tiempo_promedio_global = tiempo_total_diario / total_dias
         dias = tiempo_promedio_global.days
         horas, resto = divmod(tiempo_promedio_global.seconds, 3600)
         minutos, segundos = divmod(resto, 60)
-
-        tiempo_formateado = f"{dias}d {horas:02}h {minutos:02}m {segundos:02}s"
         
+        # Formatear el tiempo promedio global
+        tiempo_formateado = f"{dias}d {horas:02}h {minutos:02}m {segundos:02}s"
+        print(f"\nTiempo promedio global por día: {tiempo_formateado}")
+        
+        # Retornar el tiempo promedio global y en segundos
         return {
             "TPD_formateado": tiempo_formateado,
             "TPD_segundos": round(tiempo_promedio_global.total_seconds())
         }
     except Exception as e:
+        # Capturar y mostrar el error
         print(f"Error al calcular el tiempo promedio de detección por día: {e}")
         return {"TPD_formateado": "0d 00h 00m 00s", "TPD_segundos": 0}
 
@@ -1055,59 +1077,123 @@ def calcular_proporcion_riesgo():
     return {"PR": round(PR, 2)}
 
 # 3. Cálculo de la Tasa de Intervención Efectiva (TIE)
-def calcular_intervencion_efectiva():
-    pacientes_con_leve_o_preeclampsia = Diagnostico.objects.filter(nivelriesgo__in=["Leve", "Preeclampsia"]).values_list('paciente', flat=True).distinct()
-    
-    total_leve = 0
-    sin_progresion = 0
+def calcular_intervencion_efectiva():    
 
-    for paciente_id in pacientes_con_leve_o_preeclampsia:
-        diagnosticos_paciente = Diagnostico.objects.filter(paciente_id=paciente_id).order_by('fecha_prediccion')
-        
-        primer_diagnostico = diagnosticos_paciente.first()
-        if primer_diagnostico and primer_diagnostico.nivelriesgo in ["Leve", "Preeclampsia"]:
-            total_leve += 1
-            progreso_a_severa = False
-            
-            for diagnostico in diagnosticos_paciente:
-                if diagnostico.nivelriesgo == "Severa":
-                    progreso_a_severa = True
-                    break
-            
-            if not progreso_a_severa:
-                sin_progresion += 1
-   
-    TIE = (sin_progresion / total_leve) * 100 if total_leve > 0 else 0
-    return {"TIE": round(TIE, 2)}
+    # Obtener la última fecha de diagnóstico disponible
+    fecha_ultimo_diagnostico = Diagnostico.objects.filter(
+        nivelriesgo__in=["Leve", "Preeclampsia"]
+    ).order_by('-fecha_prediccion').values_list('fecha_prediccion', flat=True).distinct().first()
 
-def calcular_casos_severa_a_leve():
-    casos_severa_a_leve = 0
-    total_pacientes_con_severa = 0
+    if not fecha_ultimo_diagnostico:
+        print("No se encontraron diagnósticos.")
+        return {"TIE": 0, "sin_progresion": 0}
 
-    pacientes_ids = Diagnostico.objects.filter(nivelriesgo="Severa").values_list('paciente', flat=True).distinct()
+    # Filtrar pacientes diagnosticados en la última fecha de diagnóstico
+    pacientes_con_riesgo = Diagnostico.objects.filter(
+        nivelriesgo__in=["Leve", "Preeclampsia"],
+        fecha_prediccion=fecha_ultimo_diagnostico
+    ).values_list('paciente', flat=True).distinct()
 
-    for paciente_id in pacientes_ids:
-        diagnosticos = Diagnostico.objects.filter(paciente_id=paciente_id).order_by('fecha_prediccion')
+    # Inicializar contadores
+    total_pacientes = Diagnostico.objects.filter(fecha_prediccion=fecha_ultimo_diagnostico).count()
+    pacientes_con_riesgo_count = len(pacientes_con_riesgo)
+    sin_progresion_count = 0  # Contador para pacientes sin progresión a "Severa"
 
-        tuvo_severa = False
-        cambio_a_leve = False
+    # Diccionario para registrar cambios
+    cambios_pacientes = defaultdict(list)
 
-        for diagnostico in diagnosticos:
-            if diagnostico.nivelriesgo == "Severa":
-                tuvo_severa = True
-            elif diagnostico.nivelriesgo == "Leve" and tuvo_severa:
-                cambio_a_leve = True
-                break 
+    for paciente_id in pacientes_con_riesgo:
+        # Recuperar todos los diagnósticos del paciente ordenados por fecha
+        diagnosticos_paciente = Diagnostico.objects.filter(
+            paciente_id=paciente_id
+        ).order_by('fecha_prediccion')
 
-        if tuvo_severa:
-            total_pacientes_con_severa += 1
-        if cambio_a_leve:
-            casos_severa_a_leve += 1
+        # Rastrear niveles de riesgo y fechas para cada paciente
+        niveles_diagnostico = [diag.nivelriesgo for diag in diagnosticos_paciente]
+        fechas_diagnostico = [diag.fecha_prediccion for diag in diagnosticos_paciente]
+        cambios_pacientes[paciente_id] = list(zip(fechas_diagnostico, niveles_diagnostico))
 
-    porcentaje_severa_a_leve = (casos_severa_a_leve / total_pacientes_con_severa) * 100 if total_pacientes_con_severa > 0 else 0
+        # Verificar si el paciente no tuvo progresión a "Severa"
+        if "Severa" not in niveles_diagnostico:
+            sin_progresion_count += 1
+
+    # Calcular la TIE
+    TIE = (pacientes_con_riesgo_count / total_pacientes) * 100 if total_pacientes > 0 else 0
+
+    # Imprimir cambios entre semanas para cada paciente
+    print(f"\n==== Cambios Semanales por Paciente ====\n")
+    for paciente_id, cambios in cambios_pacientes.items():
+        print(f"Paciente {paciente_id}:")
+        for i in range(len(cambios) - 1):
+            fecha_anterior, nivel_anterior = cambios[i]
+            fecha_actual, nivel_actual = cambios[i + 1]
+            print(f"  {fecha_anterior} ({nivel_anterior}) → {fecha_actual} ({nivel_actual})")
+        print("\n")
+
+    print(f"Fecha: {fecha_ultimo_diagnostico}")
+    print(f"Total pacientes: {total_pacientes}")
+    print(f"Pacientes con riesgo: {pacientes_con_riesgo_count}")
+    print(f"Pacientes sin progresión a 'Severa': {sin_progresion_count}")
+    print(f"TIE calculado: {round(TIE, 2)}%")
 
     return {
-        "casos_severa_a_leve": casos_severa_a_leve,
-        "total_pacientes_con_severa": total_pacientes_con_severa,
-        "porcentaje_severa_a_leve": porcentaje_severa_a_leve
+        "TIE": round(TIE, 2),
+        "fechaTIE": fecha_ultimo_diagnostico,
+        "detalle_cambios": cambios_pacientes,
+        "sin_progresion": sin_progresion_count
     }
+
+def calcular_cambios_a_riesgo():
+    
+    # Obtener la última fecha de diagnóstico disponible
+    fecha_ultimo_diagnostico = Diagnostico.objects.filter(
+        nivelriesgo__in=["Leve", "Preeclampsia"]
+    ).order_by('-fecha_prediccion').values_list('fecha_prediccion', flat=True).distinct().first()
+
+    if not fecha_ultimo_diagnostico:
+        print("No se encontraron diagnósticos.")
+        return {"TIE": 0}
+
+    # Filtrar pacientes diagnosticados en la última fecha de diagnóstico
+    pacientes_con_riesgo = Diagnostico.objects.filter(
+        nivelriesgo__in=["Leve", "Preeclampsia"],
+        fecha_prediccion=fecha_ultimo_diagnostico
+    ).values_list('paciente', flat=True).distinct()
+
+    # Inicializar contadores
+    total_pacientes = Diagnostico.objects.filter(fecha_prediccion=fecha_ultimo_diagnostico).count()
+    pacientes_con_riesgo_count = len(pacientes_con_riesgo)
+
+    # Diccionario para registrar cambios
+    cambios_pacientes = defaultdict(list)
+
+    for paciente_id in pacientes_con_riesgo:
+        # Recuperar todos los diagnósticos del paciente ordenados por fecha
+        diagnosticos_paciente = Diagnostico.objects.filter(
+            paciente_id=paciente_id
+        ).order_by('fecha_prediccion')
+
+        # Rastrear niveles de riesgo y fechas para cada paciente
+        niveles_diagnostico = [diag.nivelriesgo for diag in diagnosticos_paciente]
+        fechas_diagnostico = [diag.fecha_prediccion for diag in diagnosticos_paciente]
+        cambios_pacientes[paciente_id] = list(zip(fechas_diagnostico, niveles_diagnostico))
+
+    # Calcular la TIE
+    TIE = (pacientes_con_riesgo_count / total_pacientes) * 100 if total_pacientes > 0 else 0
+
+    # Imprimir cambios entre semanas para cada paciente
+    print(f"\n==== Cambios Semanales por Paciente ====\n")
+    for paciente_id, cambios in cambios_pacientes.items():
+        print(f"Paciente {paciente_id}:")
+        for i in range(len(cambios) - 1):
+            fecha_anterior, nivel_anterior = cambios[i]
+            fecha_actual, nivel_actual = cambios[i + 1]
+            print(f"  {fecha_anterior} ({nivel_anterior}) → {fecha_actual} ({nivel_actual})")
+        print("\n")
+
+    print(f"Fecha: {fecha_ultimo_diagnostico}")
+    print(f"Total pacientes: {total_pacientes}")
+    print(f"Pacientes con riesgo: {pacientes_con_riesgo_count}")
+    print(f"TIE calculado: {round(TIE, 2)}%")
+    
+    return {"PCR": round(TIE, 2)}

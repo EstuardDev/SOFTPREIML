@@ -87,10 +87,10 @@
                 </div>
             </div>
             <div class="TIE col-xs-12 col-sm-12 col-md-6 col-lg-6 col-xl-6">
-                <div id="tasaIntervencionChart" data-tie="{{ tasa_intervencion_efectiva }}"></div>
+                <div id="tasaIntervencionChart" data-tie="{{ tasa_intervencion_efectiva }}" data-fecha="{{ fecha_intervencion_efectiva|date:'d-m-Y' }}"></div>
             </div>
             <div class="CSL col-xs-12 col-sm-12 col-md-6 col-lg-6 col-xl-6">
-                <div id="casosSeveraLeveChart" data-porcentaje="{{ porcentaje_severa_a_leve }}"></div>
+                <div id="casosCambioRiesgoChart" data-porcentaje="{{ casos_cambios_a_riesgo }}"></div>
             </div>
         </div>
     </section>
@@ -246,10 +246,10 @@
                 </div>
             </div>
             <div class="TIE col-xs-12 col-sm-12 col-md-6 col-lg-6 col-xl-6">
-                <div id="tasaIntervencionChart" data-tie="{{ tasa_intervencion_efectiva }}"></div>
+                <div id="tasaIntervencionChart" data-tie="{{ tasa_intervencion_efectiva }}" data-fecha="{{ fecha_intervencion_efectiva|date:'d-m-Y' }}"></div>
             </div>
             <div class="CSL col-xs-12 col-sm-12 col-md-6 col-lg-6 col-xl-6">
-                <div id="casosSeveraLeveChart" data-porcentaje="{{ porcentaje_severa_a_leve }}"></div>
+                <div id="casosCambioRiesgoChart" data-porcentaje="{{ casos_cambios_a_riesgo }}"></div>
             </div>
         </div>
     </section>

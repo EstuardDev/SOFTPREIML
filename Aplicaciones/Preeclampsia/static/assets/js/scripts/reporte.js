@@ -49,62 +49,68 @@ document.addEventListener("DOMContentLoaded", function () {
 
     var proporcionRiesgo = parseFloat(document.getElementById('proporcionRiesgoChart').getAttribute('data-pr')) || 0;
     var tasaIntervencion = parseFloat(document.getElementById('tasaIntervencionChart').getAttribute('data-tie')) || 0;
+    var fechaTasaIntervencion = document.getElementById('tasaIntervencionChart').getAttribute('data-fecha');
     var tiempoPromedioDeteccion = parseFloat(document.getElementById('tiempoPromedioDeteccionChart').getAttribute('data-tpd')) || 0;
-    var porcentajeSeveraLeve = parseFloat(document.getElementById('casosSeveraLeveChart').getAttribute('data-porcentaje')) || 0;
+    var porcentajeCambioRiesgo = parseFloat(document.getElementById('casosCambioRiesgoChart').getAttribute('data-porcentaje')) || 0;
 
     var barColor;
-    if (porcentajeSeveraLeve >= 80) {
-        barColor = '#198754'; 
-    } else if (porcentajeSeveraLeve >= 50) {
-        barColor = '#FFC107'; 
+    if (porcentajeCambioRiesgo >= 80) {
+        barColor = '#198754'; // Verde para 80% o más
+    } else if (porcentajeCambioRiesgo >= 50) {
+        barColor = '#FFC107'; // Amarillo para 50% - 79%
     } else {
-        barColor = '#ff4500'; 
+        barColor = '#ff4500'; // Rojo para menos de 50%
     }
 
-    var severaLeveChartDom = document.getElementById('casosSeveraLeveChart');
-    var severaLeveChart = echarts.init(severaLeveChartDom);
-    var severaLeveOption = {
-        title: {
-            text: 'Riesgo Severo Controlado',
-            left: 'center'
-        },
-        xAxis: {
-            type: 'category',
-            data: ['Cambio a Leve']
-        },
-        yAxis: {
-            type: 'value',
-            max: 100
-        },
-        toolbox: {
-            show: true,
-            feature: {
-                mark: { show: true },
-                restore: { show: true },
-                saveAsImage: { show: true }
-            }
-        },
-        series: [
-            {
-                name: 'Cambio de Severa a Leve',
-                type: 'bar',
-                data: [porcentajeSeveraLeve],
-                label: {
-                    show: true,
-                    position: 'inside', 
-                    formatter: '{c}%', 
-                    fontSize: 35,
-                    fontWeight: 'bold',
-                    color: '#fff' 
-                },
-                itemStyle: {
-                    color: barColor,  
-                    borderRadius: [10, 10, 0, 0]  
+    var cambioRiesgoChartDom = document.getElementById('casosCambioRiesgoChart');
+    if (cambioRiesgoChartDom) {
+        var cambioRiesgoChart = echarts.init(cambioRiesgoChartDom);
+        var cambioRiesgoOption = {
+            grid: {
+                containLabel: true // Esto asegura que las etiquetas no se salgan del gráfico
+            },
+            title: {
+                text: 'Casos Observados sin Progresión',
+                left: 'center'
+            },
+            xAxis: {
+                type: 'category',
+                data: ['% sin Progresión'],
+            },
+            yAxis: {
+                type: 'value',
+                max: 100
+            },
+            toolbox: {
+                show: true,
+                feature: {
+                    mark: { show: true },
+                    restore: { show: true },
+                    saveAsImage: { show: true }
                 }
-            }
-        ]
-    };
-    severaLeveChart.setOption(severaLeveOption);
+            },
+            series: [
+                {
+                    name: 'Cambio de Severa a Leve',
+                    type: 'bar',
+                    data: [porcentajeCambioRiesgo],
+                    label: {
+                        show: true,
+                        position: 'inside',  // Muestra el porcentaje dentro de la barra
+                        formatter: '{c}%',  // Formato del valor como porcentaje
+                        fontSize: 35,
+                        fontWeight: 'bold',
+                        color: '#fff'  // Color de texto blanco para visibilidad
+                    },
+                    itemStyle: {
+                        color: barColor,  // Color dinámico de la barra basado en el porcentaje
+                        borderRadius: [10, 10, 0, 0]  // Bordes redondeados en la parte superior
+                    }
+                }
+            ]
+        };
+        cambioRiesgoChart.setOption(cambioRiesgoOption);
+    }
 
     var tpdChartDom = document.getElementById('tiempoPromedioDeteccionChart');
     var tpdChart = echarts.init(tpdChartDom);
@@ -255,16 +261,20 @@ document.addEventListener("DOMContentLoaded", function () {
         var tieChart = echarts.init(tieChartDom);
         var tieOption = {
             title: {
-                text: 'Tasa de Intervención Efectiva (TIE)',
+                text: 'Casos Observados sin Progresión',
                 left: 'center'
             },
             xAxis: {
                 type: 'category',
-                data: ['TIE']
+                data: [fechaTasaIntervencion], // Puedes mostrar la fecha aquí
             },
             yAxis: {
                 type: 'value',
-                max: 100
+                axisLabel: {
+                    formatter: '{value}'  // Muestra la cantidad de pacientes
+                },
+                name: 'N° de Casos',  // Etiqueta para el eje Y
+                max: tasaIntervencion  // Ajustar el valor máximo según la cantidad de pacientes
             },
             toolbox: {
                 show: true,
@@ -276,13 +286,13 @@ document.addEventListener("DOMContentLoaded", function () {
             },
             series: [
                 {
-                    name: 'Tasa de Intervención Efectiva',
+                    name: 'Pacientes con Intervención Efectiva',
                     type: 'bar',
-                    data: [tasaIntervencion],
+                    data: [tasaIntervencion], // Usa la cantidad de pacientes
                     label: {
                         show: true,
-                        position: 'inside',  
-                        formatter: '{c}%',  
+                        position: 'inside',  // Posición dentro de la barra
+                        formatter: '{c}',  // Muestra la cantidad de pacientes
                         fontSize: 35,
                         fontWeight: 'bold',
                         color: '#fff'
@@ -305,8 +315,8 @@ document.addEventListener("DOMContentLoaded", function () {
         if (tieChart) {
             tieChart.resize();
         }
-        if (severaLeveChart) {
-            severaLeveChart.resize();
+        if (cambioRiesgoChart) {
+            cambioRiesgoChart.resize();
         }
     });
 
