@@ -4,6 +4,7 @@ from django.conf import settings
 from collections import defaultdict
 from datetime import timedelta, datetime
 from django.db.models import Count
+import pandas as pd
 from django.contrib.auth.models import User, Group
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, update_session_auth_hash
@@ -706,8 +707,14 @@ def guardarDiagnostico(request):
                 test_de_as, proteinuria_g, tgo, tgp, creatinina, urea, fibrinogeno
             ]]
             
-            datos_scaled = scaler.transform(datos)
-            riesgo_codificado = modelo.predict(datos_scaled)[0]
+            columnas = [
+                'edad_gestacional', 'periodo_intergenesico', 'embarazo_nueva_pareja', 'hipertension_cronica', 'pa_sistolica_basal',
+                'pa_diastolica_basal', 'presion_sistolica1', 'presion_diastolica1', 'presion_sistolica2', 'presion_diastolica2',
+                'test_de_as', 'proteinuria_g', 'tgo', 'tgp', 'creatinina', 'urea', 'fibrinogeno'
+            ]
+            
+            df_datos = pd.DataFrame(datos, columns=columnas)
+            riesgo_codificado = modelo.predict(df_datos)[0]
             riesgo = label_encoder.inverse_transform([riesgo_codificado])[0]
             
             pam1 = (presion_sistolica1 + 2 * presion_diastolica1) / 3
