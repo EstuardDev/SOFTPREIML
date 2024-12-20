@@ -1110,14 +1110,14 @@ a.sidebar-link:hover {
   opacity: 1;
 }
 
-#proporcionRiesgoChart, #tasaIntervencionChart, #tiempoPromedioDeteccionChart, #casosSeveraLeveChart {
+#proporcionRiesgoChart, #tasaIntervencionChart, #tiempoPromedioDeteccionChart, #casosCambioRiesgoChart {
   width: 100%;
   height: 400px;
   max-width: 100%;
 }
 
 @media (max-width: 320px) {
-  #proporcionRiesgoChart, #tasaIntervencionChart, #tiempoPromedioDeteccionChart, #casosSeveraLeveChart {
+  #proporcionRiesgoChart, #tasaIntervencionChart, #tiempoPromedioDeteccionChart, #casosCambioRiesgoChart {
     height: 200px;
   }
 }
