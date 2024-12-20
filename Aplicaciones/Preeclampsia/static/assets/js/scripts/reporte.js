@@ -1,12 +1,10 @@
 document.addEventListener("DOMContentLoaded", function () {
 
+    // Inicialización de DataTable
     $('#tablaReportes').DataTable({
         lengthMenu: [5, 10, 15, 20],
         pageLength: 10,
         ordering: false,
-        // paging: false,
-        // info: false,
-        // dom: 'Bfrtip',
         layout: {
             topStart: {
                 buttons: [
@@ -29,21 +27,13 @@ document.addEventListener("DOMContentLoaded", function () {
             "sInfo": "Mostrando  _START_ al _END_ de _TOTAL_ registros",
             "sInfoEmpty": "Mostrando  0 al 0 de 0 registros",
             "sInfoFiltered": "(filtrado de un total de _MAX_ registros)",
-            "sInfoPostFix": "",
             "sSearch": "Buscar:",
-            "sUrl": "",
-            "sInfoThousands": ",",
-            "sLoadingRecords": "Cargando...",
             "oPaginate": {
                 "sFirst": '<i class="fa-solid fa-angles-left"></i>',
                 "sLast": '<i class="fa-solid fa-angles-right"></i>',
                 "sNext": '<i class="fa-solid fa-angle-right"></i>',
                 "sPrevious": '<i class="fa-solid fa-angle-left"></i>'
             },
-            "oAria": {
-                "sSortAscending": ": Activar para ordenar la columna de manera ascendente",
-                "sSortDescending": ": Activar para ordenar la columna de manera descendente"
-            }
         },
     });
 
@@ -53,6 +43,13 @@ document.addEventListener("DOMContentLoaded", function () {
     var tiempoPromedioDeteccion = parseFloat(document.getElementById('tiempoPromedioDeteccionChart').getAttribute('data-tpd')) || 0;
     var porcentajeCambioRiesgo = parseFloat(document.getElementById('casosCambioRiesgoChart').getAttribute('data-porcentaje')) || 0;
 
+    // console.log("Proporción de Riesgo:", proporcionRiesgo);
+    console.log("Tasa de Intervención Efectiva:", tasaIntervencion);
+    console.log("FEchade Intervención Efectiva:", fechaTasaIntervencion);
+    // console.log("Tiempo Promedio de Detección (segundos):", tiempoPromedioDeteccion);
+    // console.log("Porcentaje de Cambios de Riesgo:", porcentajeCambioRiesgo);
+
+    // Definir el color según el porcentaje
     var barColor;
     if (porcentajeCambioRiesgo >= 80) {
         barColor = '#198754'; // Verde para 80% o más
@@ -62,6 +59,7 @@ document.addEventListener("DOMContentLoaded", function () {
         barColor = '#ff4500'; // Rojo para menos de 50%
     }
 
+    // Configuración del gráfico de barras para Casos de Cambio de Riesgos a un nivel alto como Leve, Preclamspsia
     var cambioRiesgoChartDom = document.getElementById('casosCambioRiesgoChart');
     if (cambioRiesgoChartDom) {
         var cambioRiesgoChart = echarts.init(cambioRiesgoChartDom);
@@ -112,9 +110,14 @@ document.addEventListener("DOMContentLoaded", function () {
         cambioRiesgoChart.setOption(cambioRiesgoOption);
     }
 
+
+    // Gráfico de Tiempo Promedio de Detección (TPD)
     var tpdChartDom = document.getElementById('tiempoPromedioDeteccionChart');
     var tpdChart = echarts.init(tpdChartDom);
     var tpdOption = {
+        grid: {
+            containLabel: true // Esto asegura que las etiquetas no se salgan del gráfico
+        },
         title: {
             text: 'Tiempo Promedio de Detección (TPD)',
             left: 'center'
@@ -135,13 +138,13 @@ document.addEventListener("DOMContentLoaded", function () {
             {
                 name: 'Tiempo Promedio de Detección',
                 type: 'gauge',
-                max: 2592000, 
+                max: 2592000, // Máximo de 30 días en segundos
                 axisLine: {
                     lineStyle: {
                         color: [
-                            [0.25, '#198754'],
-                            [0.5, '#FFC107'], 
-                            [1, '#DC3545']
+                            [0.25, '#198754'], // Verde: TPD de 0 a 7 días
+                            [0.5, '#FFC107'],  // Amarillo: TPD de 7 a 14 días
+                            [1, '#DC3545']     // Rojo: TPD superior a 14 días
                         ],
                         width: 20
                     }
@@ -174,7 +177,9 @@ document.addEventListener("DOMContentLoaded", function () {
         ]
     };
     tpdChart.setOption(tpdOption);
+    //------------------------------
 
+    // Gráfico circular para Proporción de Riesgo (PR)
     var prChartDom = document.getElementById('proporcionRiesgoChart');
     if (prChartDom) {
         var prChart = echarts.init(prChartDom);
@@ -221,14 +226,14 @@ document.addEventListener("DOMContentLoaded", function () {
                     emphasis: {
                         label: {
                             show: true,
-                            fontSize: 40, 
+                            fontSize: 40,  // Tamaño más grande al hacer hover
                             fontWeight: 'bold',
-                            formatter: '{d}%',  
+                            formatter: '{d}%',  // Mostrar solo el porcentaje sin el nombre al pasar el ratón
                             color: '#333'
                         }
                     },
                     labelLine: {
-                        show: false 
+                        show: false // Ocultar líneas de etiqueta para centrar la atención en el porcentaje central
                     },
                     data: [
                         { value: proporcionRiesgo, name: 'Riesgo de Preeclampsia', itemStyle: { color: '#DC3545' } },
@@ -245,7 +250,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 prChart.setOption(prOption, true); // Aplica los cambios al gráfico
             }
         });
-        
+
         prChart.on('mouseout', function (params) {
             if (params.seriesType === 'pie') { // Verifica que el evento proviene del gráfico circular
                 prOption.series[0].label.show = true; // Restaura el label predeterminado
@@ -255,7 +260,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
         prChart.setOption(prOption);
     }
+    //------------------------------
 
+    // Gráfico de barras para Tasa de Intervención Preventiva Efectiva (TIPE)
+    // Gráfico de barras para Tasa de Intervención Preventiva Efectiva (TIPE)
     var tieChartDom = document.getElementById('tasaIntervencionChart');
     if (tieChartDom) {
         var tieChart = echarts.init(tieChartDom);
@@ -307,6 +315,9 @@ document.addEventListener("DOMContentLoaded", function () {
         tieChart.setOption(tieOption);
     }
 
+    //------------------------------
+
+    // Evento para redimensionar los gráficos
     window.addEventListener('resize', function () {
         tpdChart.resize();
         if (prChart) {
