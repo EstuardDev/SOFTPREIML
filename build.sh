@@ -35,7 +35,7 @@ from django.contrib.sessions.models import Session
 from django.contrib.auth.models import User, Group
 
 # Cambia estos valores a los que desees
-username = 'Admin'
+username = 'SuperAdmin'
 password = 'admin12345'
 email = 'admin@gmail.com'  # Correo electrónico
 
